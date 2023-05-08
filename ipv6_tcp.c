@@ -22,7 +22,6 @@ int create_socket()
     return sockfd;
 }
 
-
 void connect_server(char *ip, int port)
 {
     int sockfd = create_socket(AF_INET6);
@@ -36,45 +35,37 @@ void connect_server(char *ip, int port)
         perror("connect");
         exit(EXIT_FAILURE);
     }
-    printf("Connected to server at %s:%d\n", ip, port);
-    char buffer[MAX_BUFFER_SIZE];
-    fd_set set;
-    FD_ZERO(&set);
-    while (1)
+    printf("Connected to server at %s IPv6 on port %d using TCP\n", ip, port);
+
+    // Open the file for reading
+    FILE *fp;
+    fp = fopen("100MB-File.c", "rb");
+    if (fp == NULL)
     {
-        FD_SET(STDIN_FILENO, &set);
-        FD_SET(sockfd, &set);
-        int max_fd = sockfd > STDIN_FILENO ? sockfd : STDIN_FILENO;
-        select(max_fd + 1, &set, NULL, NULL, NULL);
-        if (FD_ISSET(sockfd, &set))
+        perror("fopen");
+        exit(EXIT_FAILURE);
+    }
+
+    // Send the contents of the file to the server
+    char buffer[MAX_BUFFER_SIZE];
+    size_t bytes_read;
+    printf("Starting to send the file\n");
+    while ((bytes_read = fread(buffer, sizeof(char), MAX_BUFFER_SIZE, fp)) > 0)
+    {
+        int bytes_sent = send(sockfd, buffer, bytes_read, 0);
+        if (bytes_sent < 0)
         {
-            int bytes_recv = recv(sockfd, buffer, MAX_BUFFER_SIZE, 0);
-            if (bytes_recv < 0)
-            {
-                perror("recv");
-                exit(EXIT_FAILURE);
-            }
-            else if (bytes_recv == 0)
-            {
-                printf("Server disconnected\n");
-                exit(EXIT_FAILURE);
-            }
-            buffer[bytes_recv] = '\0';
-            printf("anonymous: %s", buffer);
-        }
-        if (FD_ISSET(STDIN_FILENO, &set))
-        {
-            if (fgets(buffer, MAX_BUFFER_SIZE, stdin) != NULL)
-            {
-                int bytes_sent = send(sockfd, buffer, strlen(buffer), 0);
-                if (bytes_sent < 0)
-                {
-                    perror("send");
-                    exit(EXIT_FAILURE);
-                }
-            }
+            perror("send");
+            exit(EXIT_FAILURE);
         }
     }
+
+    printf("The entire file has been sent\n");
+    printf("Closes the connection with the server at %s on port %d using TCP\n", ip, port);
+
+    // Close the file and the socket
+    fclose(fp);
+    close(sockfd);
 }
 
 void start_server(int port)
@@ -95,7 +86,7 @@ void start_server(int port)
         perror("listen");
         exit(EXIT_FAILURE);
     }
-    printf("Listening on port %d\n", port);
+    printf("Listening on port %d (IPv6, TCP)\n", port);
     socklen_t cliaddrlen = sizeof(cliaddr);
     int connfd = accept(sockfd, (struct sockaddr *)&cliaddr, &cliaddrlen);
     if (connfd < 0)
@@ -127,8 +118,6 @@ void start_server(int port)
                 printf("Client disconnected\n");
                 exit(EXIT_SUCCESS);
             }
-            buffer[bytes_recv] = '\0';
-            printf("anonymous: %s", buffer);
         }
         if (FD_ISSET(STDIN_FILENO, &set))
         {

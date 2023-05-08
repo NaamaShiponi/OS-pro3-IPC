@@ -35,7 +35,7 @@ void part_a_connect_server(char *ip, int port)
         perror("connect");
         exit(EXIT_FAILURE);
     }
-    printf("Connected to server at %s:%d\n", ip, port);
+    printf("Connected to server at %s IPv4 on port %d using TCP\n", ip, port);
     char buffer[MAX_BUFFER_SIZE];
     fd_set set;
     FD_ZERO(&set);
@@ -94,7 +94,7 @@ void part_a_start_server(int port)
         perror("listen");
         exit(EXIT_FAILURE);
     }
-    printf("Listening on port %d\n", port);
+    printf("Listening on port %d (IPv4, TCP)\n", port);
     socklen_t cliaddrlen = sizeof(cliaddr);
     int connfd = accept(sockfd, (struct sockaddr *)&cliaddr, &cliaddrlen);
     if (connfd < 0)

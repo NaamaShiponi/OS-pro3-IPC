@@ -11,56 +11,57 @@
 
 #define MAX_BUFFER_SIZE 1024
 
-int create_socket() {
-    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sockfd < 0) {
+int create_socket()
+{
+    int sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (sockfd < 0)
+    {
         perror("socket");
         exit(EXIT_FAILURE);
     }
     return sockfd;
 }
+
 void connect_server(char *ip, int port)
 {
     int sockfd = create_socket();
     struct sockaddr_in servaddr;
     memset(&servaddr, 0, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
-    inet_pton(AF_INET, ip, &(servaddr.sin_addr));
+    servaddr.sin_addr.s_addr = inet_addr(ip);
     servaddr.sin_port = htons(port);
     if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
     {
         perror("connect");
         exit(EXIT_FAILURE);
     }
-    printf("Connected to server at %s IPv4 on port %d using UDP\n", ip, port);
-
-    // Open file
-    FILE *fp = fopen("100MB-File.c", "r");
-    if (!fp)
-    {
+    printf("Connected to server at %s IPv4 on port %d using TCP\n", ip, port);
+    
+    // Open the file and read its contents
+    FILE* file = fopen("100MB-File.c", "rb");
+    if (!file) {
         perror("fopen");
         exit(EXIT_FAILURE);
     }
-
-    // Read file contents and send over socket
     char buffer[MAX_BUFFER_SIZE];
-    int total_sent = 0;
-    size_t bytes_read = 0;
+    size_t bytes_read = fread(buffer, sizeof(char), MAX_BUFFER_SIZE, file);
+
+    // Send the file in chunks of MAX_BUFFER_SIZE bytes
     printf("Starting to send the file\n");
-    while ((bytes_read = fread(buffer, 1, MAX_BUFFER_SIZE, fp)) > 0)
-    {
+    while (bytes_read > 0) {
         int bytes_sent = send(sockfd, buffer, bytes_read, 0);
         if (bytes_sent < 0)
         {
             perror("send");
             exit(EXIT_FAILURE);
         }
+        bytes_read = fread(buffer, sizeof(char), MAX_BUFFER_SIZE, file);
     }
     printf("The entire file has been sent\n");
-    printf("Closes the connection with the server at %s on port %d using UDP\n", ip, port);
+    printf("Closes the connection with the server at %s on port %d using TCP\n", ip, port);
 
-    // Close file and socket
-    fclose(fp);
+    // Close the file and socket
+    fclose(file);
     close(sockfd);
 }
 
@@ -69,7 +70,6 @@ void start_server(int port)
     int sockfd = create_socket();
     struct sockaddr_in servaddr, cliaddr;
     memset(&servaddr, 0, sizeof(servaddr));
-    memset(&cliaddr, 0, sizeof(cliaddr));
     servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
     servaddr.sin_port = htons(port);
@@ -78,39 +78,52 @@ void start_server(int port)
         perror("bind");
         exit(EXIT_FAILURE);
     }
-    printf("Listening on port %d (IPv4, UDP)\n", port);
-
+    if (listen(sockfd, 1) < 0)
+    {
+        perror("listen");
+        exit(EXIT_FAILURE);
+    }
+    printf("Listening on port %d (IPv4, TCP)\n", port);
     socklen_t cliaddrlen = sizeof(cliaddr);
-
+    int connfd = accept(sockfd, (struct sockaddr *)&cliaddr, &cliaddrlen);
+    if (connfd < 0)
+    {
+        perror("accept");
+        exit(EXIT_FAILURE);
+    }
     char buffer[MAX_BUFFER_SIZE];
+
     fd_set set;
     FD_ZERO(&set);
 
     while (1)
     {
         FD_SET(STDIN_FILENO, &set);
-        FD_SET(sockfd, &set);
-        int max_fd = sockfd > STDIN_FILENO ? sockfd : STDIN_FILENO;
+        FD_SET(connfd, &set);
+        int max_fd = connfd > STDIN_FILENO ? connfd : STDIN_FILENO;
         select(max_fd + 1, &set, NULL, NULL, NULL);
-        if (FD_ISSET(sockfd, &set))
+        if (FD_ISSET(connfd, &set))
         {
-            int bytes_recv = recvfrom(sockfd, buffer, MAX_BUFFER_SIZE, 0,
-                                      (struct sockaddr *)&cliaddr, &cliaddrlen);
+            int bytes_recv = recv(connfd, buffer, MAX_BUFFER_SIZE, 0);
             if (bytes_recv < 0)
             {
-                perror("recvfrom");
+                perror("recv");
                 exit(EXIT_FAILURE);
+            }
+            else if (bytes_recv == 0)
+            {
+                printf("Client disconnected\n");
+                exit(EXIT_SUCCESS);
             }
         }
         if (FD_ISSET(STDIN_FILENO, &set))
         {
             if (fgets(buffer, MAX_BUFFER_SIZE, stdin) != NULL)
             {
-                int bytes_sent = sendto(sockfd, buffer, strlen(buffer), 0,
-                                        (struct sockaddr *)&cliaddr, sizeof(cliaddr));
+                int bytes_sent = send(connfd, buffer, strlen(buffer), 0);
                 if (bytes_sent < 0)
                 {
-                    perror("sendto");
+                    perror("send");
                     exit(EXIT_FAILURE);
                 }
             }
