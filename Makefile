@@ -12,6 +12,10 @@ PART_A_O= $(PART_A_C:.c=.o)
 
 
 # PART B
+#-tcp time
+TCP_TIME_C= tcp_time.c
+TCP_TIME_O= $(TCP_TIME_C:.c=.o) 
+
 #-ipv6 tcp
 IPV6_TCP_C= ipv6_tcp.c
 IPV6_TCP_O= $(IPV6_TCP_C:.c=.o) 
@@ -22,7 +26,7 @@ IPV4_UDP_O= $(IPV4_UDP_C:.c=.o)
 
 
 #ALL FILE
-OBJS = $(STNC_O) $(IPV6_TCP_O) $(PART_A_O) $(IPV4_UDP_O)
+OBJS = $(STNC_O) $(TCP_TIME_O) $(IPV6_TCP_O) $(PART_A_O) $(IPV4_UDP_O) 
 ALLFILES = $(OBJS) $(STNC_C:.c=) 
 
 all: stnc
@@ -34,6 +38,9 @@ $(STNC_O): $(STNC_C) $(STNC_H)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(PART_A_O): $(PART_A_C)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(TCP_TIME_O): $(TCP_TIME_C)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(IPV6_TCP_O): $(IPV6_TCP_C)
