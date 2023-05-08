@@ -1,23 +1,26 @@
 CC = gcc
 CFLAGS = -g -Wall 
 
-SRCS = stnc.c stnc1.c
-OBJS = $(SRCS:.c=.o)
+STNC_C = stnc.c
+STNC_O= $(STNC_C:.c=.o) 
 
-all: stnc stnc1
+IPV6_TCP_C= ipv6_tcp.c
+IPV6_TCP_O= $(IPV6_TCP_C:.c=.o) 
 
-stnc: stnc.o
+OBJS = $(STNC_O) $(IPV6_TCP_O)
+ALLFILES = $(STNC_O) $(IPV6_TCP_O) $(IPV6_TCP_C:.c=) $(STNC_C:.c=) 
+
+all: stnc
+
+stnc: $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $<
 
-stnc.o: stnc.c
+$(STNC_O): $(STNC_C)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-stnc1: stnc1.o
-	$(CC) $(CFLAGS) -o $@ $<
-
-stnc1.o: stnc1.c
+$(IPV6_TCP_O): $(IPV6_TCP_C)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f stnc stnc1 $(OBJS)
+	rm -f $(ALLFILES)
 
