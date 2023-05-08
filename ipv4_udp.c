@@ -19,7 +19,6 @@ int create_socket() {
     }
     return sockfd;
 }
-
 void connect_server(char *ip, int port)
 {
     int sockfd = create_socket();
@@ -35,44 +34,34 @@ void connect_server(char *ip, int port)
     }
     printf("Connected to server at %s IPv4 on port %d using UDP\n", ip, port);
 
-    char buffer[MAX_BUFFER_SIZE];
-    fd_set set;
-    FD_ZERO(&set);
-    while (1)
+    // Open file
+    FILE *fp = fopen("100MB-File.c", "r");
+    if (!fp)
     {
-        FD_SET(STDIN_FILENO, &set);
-        FD_SET(sockfd, &set);
-        int max_fd = sockfd > STDIN_FILENO ? sockfd : STDIN_FILENO;
-        select(max_fd + 1, &set, NULL, NULL, NULL);
-        if (FD_ISSET(sockfd, &set))
+        perror("fopen");
+        exit(EXIT_FAILURE);
+    }
+
+    // Read file contents and send over socket
+    char buffer[MAX_BUFFER_SIZE];
+    int total_sent = 0;
+    size_t bytes_read = 0;
+    printf("Starting to send the file\n");
+    while ((bytes_read = fread(buffer, 1, MAX_BUFFER_SIZE, fp)) > 0)
+    {
+        int bytes_sent = send(sockfd, buffer, bytes_read, 0);
+        if (bytes_sent < 0)
         {
-            int bytes_recv = recv(sockfd, buffer, MAX_BUFFER_SIZE, 0);
-            if (bytes_recv < 0)
-            {
-                perror("recv");
-                exit(EXIT_FAILURE);
-            }
-            else if (bytes_recv == 0)
-            {
-                printf("Server disconnected\n");
-                exit(EXIT_FAILURE);
-            }
-            buffer[bytes_recv] = '\0';
-            printf("anonymous: %s", buffer);
-        }
-        if (FD_ISSET(STDIN_FILENO, &set))
-        {
-            if (fgets(buffer, MAX_BUFFER_SIZE, stdin) != NULL)
-            {
-                int bytes_sent = send(sockfd, buffer, strlen(buffer), 0);
-                if (bytes_sent < 0)
-                {
-                    perror("send");
-                    exit(EXIT_FAILURE);
-                }
-            }
+            perror("send");
+            exit(EXIT_FAILURE);
         }
     }
+    printf("The entire file has been sent\n");
+    printf("Closes the connection with the server at %s on port %d using UDP\n", ip, port);
+
+    // Close file and socket
+    fclose(fp);
+    close(sockfd);
 }
 
 void start_server(int port)
@@ -112,8 +101,6 @@ void start_server(int port)
                 perror("recvfrom");
                 exit(EXIT_FAILURE);
             }
-            buffer[bytes_recv] = '\0';
-            printf("%s:%d: %s", inet_ntoa(cliaddr.sin_addr), ntohs(cliaddr.sin_port), buffer);
         }
         if (FD_ISSET(STDIN_FILENO, &set))
         {

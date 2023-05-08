@@ -36,44 +36,33 @@ void connect_server(char *ip, int port)
         exit(EXIT_FAILURE);
     }
     printf("Connected to server at %s IPv4 on port %d using TCP\n", ip, port);
-    char buffer[MAX_BUFFER_SIZE];
-    fd_set set;
-    FD_ZERO(&set);
-    while (1)
-    {
-        FD_SET(STDIN_FILENO, &set);
-        FD_SET(sockfd, &set);
-        int max_fd = sockfd > STDIN_FILENO ? sockfd : STDIN_FILENO;
-        select(max_fd + 1, &set, NULL, NULL, NULL);
-        if (FD_ISSET(sockfd, &set))
-        {
-            int bytes_recv = recv(sockfd, buffer, MAX_BUFFER_SIZE, 0);
-            if (bytes_recv < 0)
-            {
-                perror("recv");
-                exit(EXIT_FAILURE);
-            }
-            else if (bytes_recv == 0)
-            {
-                printf("Server disconnected\n");
-                exit(EXIT_FAILURE);
-            }
-            buffer[bytes_recv] = '\0';
-            printf("anonymous: %s", buffer);
-        }
-        if (FD_ISSET(STDIN_FILENO, &set))
-        {
-            if (fgets(buffer, MAX_BUFFER_SIZE, stdin) != NULL)
-            {
-                int bytes_sent = send(sockfd, buffer, strlen(buffer), 0);
-                if (bytes_sent < 0)
-                {
-                    perror("send");
-                    exit(EXIT_FAILURE);
-                }
-            }
-        }
+    
+    // Open the file and read its contents
+    FILE* file = fopen("100MB-File.c", "rb");
+    if (!file) {
+        perror("fopen");
+        exit(EXIT_FAILURE);
     }
+    char buffer[MAX_BUFFER_SIZE];
+    size_t bytes_read = fread(buffer, sizeof(char), MAX_BUFFER_SIZE, file);
+
+    // Send the file in chunks of MAX_BUFFER_SIZE bytes
+    printf("Starting to send the file\n");
+    while (bytes_read > 0) {
+        int bytes_sent = send(sockfd, buffer, bytes_read, 0);
+        if (bytes_sent < 0)
+        {
+            perror("send");
+            exit(EXIT_FAILURE);
+        }
+        bytes_read = fread(buffer, sizeof(char), MAX_BUFFER_SIZE, file);
+    }
+    printf("The entire file has been sent\n");
+    printf("Closes the connection with the server at %s on port %d using TCP\n", ip, port);
+
+    // Close the file and socket
+    fclose(file);
+    close(sockfd);
 }
 
 void start_server(int port)
@@ -126,8 +115,6 @@ void start_server(int port)
                 printf("Client disconnected\n");
                 exit(EXIT_SUCCESS);
             }
-            buffer[bytes_recv] = '\0';
-            printf("anonymous: %s", buffer);
         }
         if (FD_ISSET(STDIN_FILENO, &set))
         {

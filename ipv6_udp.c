@@ -33,37 +33,33 @@ void connect_server(char *ip, int port) {
     }
     printf("Connected to server at %s IPv6 on port %d using UDP\n", ip, port);
 
+    FILE *file = fopen("100MB-File.c", "rb");
+    if (file == NULL) {
+        perror("fopen");
+        exit(EXIT_FAILURE);
+    }
+
     char buffer[MAX_BUFFER_SIZE];
-    fd_set set;
-    FD_ZERO(&set);
+    int bytes_sent = 0;
+    int total_bytes_sent = 0;
+
+    printf("Starting to send the file\n");
     while (1) {
-        FD_SET(STDIN_FILENO, &set);
-        FD_SET(sockfd, &set);
-        int max_fd = sockfd > STDIN_FILENO ? sockfd : STDIN_FILENO;
-        select(max_fd + 1, &set, NULL, NULL, NULL);
-        if (FD_ISSET(sockfd, &set)) {
-            int bytes_recv = recv(sockfd, buffer, MAX_BUFFER_SIZE, 0);
-            if (bytes_recv < 0) {
-                perror("recv");
-                exit(EXIT_FAILURE);
-            }
-            else if (bytes_recv == 0) {
-                printf("Server disconnected\n");
-                exit(EXIT_FAILURE);
-            }
-            buffer[bytes_recv] = '\0';
-            printf("anonymous: %s", buffer);
+        int bytes_read = fread(buffer, 1, MAX_BUFFER_SIZE, file);
+        if (bytes_read == 0) {
+            break;
         }
-        if (FD_ISSET(STDIN_FILENO, &set)) {
-            if (fgets(buffer, MAX_BUFFER_SIZE, stdin) != NULL) {
-                int bytes_sent = send(sockfd, buffer, strlen(buffer), 0);
-                if (bytes_sent < 0) {
-                    perror("send");
-                    exit(EXIT_FAILURE);
-                }
-            }
+        bytes_sent = send(sockfd, buffer, bytes_read, 0);
+        if (bytes_sent < 0) {
+            perror("send");
+            exit(EXIT_FAILURE);
         }
     }
+    printf("The entire file has been sent\n");
+    printf("Closes the connection with the server at %s on port %d using UDP\n", ip, port);
+
+    fclose(file);
+    close(sockfd);
 }
 
 void start_server(int port)
@@ -103,10 +99,6 @@ void start_server(int port)
                 perror("recvfrom");
                 exit(EXIT_FAILURE);
             }
-            buffer[bytes_recv] = '\0';
-            char addr_str[INET6_ADDRSTRLEN];
-            inet_ntop(AF_INET6, &cliaddr.sin6_addr, addr_str, INET6_ADDRSTRLEN);
-            printf("%s:%d: %s", addr_str, ntohs(cliaddr.sin6_port), buffer);
         }
         if (FD_ISSET(STDIN_FILENO, &set))
         {
