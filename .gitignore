@@ -1,4 +1,5 @@
 .vscode
 task3*
-stnc.o
+*.o
 stnc
+
