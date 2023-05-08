@@ -11,32 +11,30 @@
 
 #define MAX_BUFFER_SIZE 1024
 
-int create_socket()
-{
-    int sockfd = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
-    if (sockfd < 0)
-    {
+int create_socket() {
+    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
         perror("socket");
         exit(EXIT_FAILURE);
     }
     return sockfd;
 }
 
-
 void connect_server(char *ip, int port)
 {
-    int sockfd = create_socket(AF_INET6);
-    struct sockaddr_in6 servaddr;
+    int sockfd = create_socket();
+    struct sockaddr_in servaddr;
     memset(&servaddr, 0, sizeof(servaddr));
-    servaddr.sin6_family = AF_INET6;
-    inet_pton(AF_INET6, ip, &(servaddr.sin6_addr));
-    servaddr.sin6_port = htons(port);
+    servaddr.sin_family = AF_INET;
+    inet_pton(AF_INET, ip, &(servaddr.sin_addr));
+    servaddr.sin_port = htons(port);
     if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
     {
         perror("connect");
         exit(EXIT_FAILURE);
     }
-    printf("Connected to server at %s:%d\n", ip, port);
+    printf("Connected to server at %s:%d (%s, %s)\n", ip, port, "ipv4", "udp");
+
     char buffer[MAX_BUFFER_SIZE];
     fd_set set;
     FD_ZERO(&set);
@@ -80,64 +78,52 @@ void connect_server(char *ip, int port)
 void start_server(int port)
 {
     int sockfd = create_socket();
-    struct sockaddr_in6 servaddr, cliaddr;
+    struct sockaddr_in servaddr, cliaddr;
     memset(&servaddr, 0, sizeof(servaddr));
-    servaddr.sin6_family = AF_INET6;
-    servaddr.sin6_addr = in6addr_any;
-    servaddr.sin6_port = htons(port);
+    memset(&cliaddr, 0, sizeof(cliaddr));
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    servaddr.sin_port = htons(port);
     if (bind(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
     {
         perror("bind");
         exit(EXIT_FAILURE);
     }
-    if (listen(sockfd, 1) < 0)
-    {
-        perror("listen");
-        exit(EXIT_FAILURE);
-    }
-    printf("Listening on port %d\n", port);
-    socklen_t cliaddrlen = sizeof(cliaddr);
-    int connfd = accept(sockfd, (struct sockaddr *)&cliaddr, &cliaddrlen);
-    if (connfd < 0)
-    {
-        perror("accept");
-        exit(EXIT_FAILURE);
-    }
-    char buffer[MAX_BUFFER_SIZE];
+    printf("Listening on port %d (%s, %s)\n", port, "ipv4", "udp");
 
+    socklen_t cliaddrlen = sizeof(cliaddr);
+
+    char buffer[MAX_BUFFER_SIZE];
     fd_set set;
     FD_ZERO(&set);
 
     while (1)
     {
         FD_SET(STDIN_FILENO, &set);
-        FD_SET(connfd, &set);
-        int max_fd = connfd > STDIN_FILENO ? connfd : STDIN_FILENO;
+        FD_SET(sockfd, &set);
+        int max_fd = sockfd > STDIN_FILENO ? sockfd : STDIN_FILENO;
         select(max_fd + 1, &set, NULL, NULL, NULL);
-        if (FD_ISSET(connfd, &set))
+        if (FD_ISSET(sockfd, &set))
         {
-            int bytes_recv = recv(connfd, buffer, MAX_BUFFER_SIZE, 0);
+            int bytes_recv = recvfrom(sockfd, buffer, MAX_BUFFER_SIZE, 0,
+                                      (struct sockaddr *)&cliaddr, &cliaddrlen);
             if (bytes_recv < 0)
             {
-                perror("recv");
+                perror("recvfrom");
                 exit(EXIT_FAILURE);
             }
-            else if (bytes_recv == 0)
-            {
-                printf("Client disconnected\n");
-                exit(EXIT_SUCCESS);
-            }
             buffer[bytes_recv] = '\0';
-            printf("anonymous: %s", buffer);
+            printf("%s:%d: %s", inet_ntoa(cliaddr.sin_addr), ntohs(cliaddr.sin_port), buffer);
         }
         if (FD_ISSET(STDIN_FILENO, &set))
         {
             if (fgets(buffer, MAX_BUFFER_SIZE, stdin) != NULL)
             {
-                int bytes_sent = send(connfd, buffer, strlen(buffer), 0);
+                int bytes_sent = sendto(sockfd, buffer, strlen(buffer), 0,
+                                        (struct sockaddr *)&cliaddr, sizeof(cliaddr));
                 if (bytes_sent < 0)
                 {
-                    perror("send");
+                    perror("sendto");
                     exit(EXIT_FAILURE);
                 }
             }
