@@ -14,37 +14,37 @@ void ClassifiedCommunication(char *side,char *ip, int port,char *type,char *para
     if ((strcmp(type, "ipv4") == 0) && (strcmp(param, "tcp") == 0)) {
         if(strcmp(side, "c")== 0){
             printf("handle_client_ipv4_tcp %s %s\n",type,param);
-            //handle_client_ipv4_tcp();
+            handle_client_ipv4_tcp(ip, port);
         }else{
             printf("handle_server_ipv4_tcp %s %s\n",type,param);
-            //handle_server_ipv4_tcp();
+            handle_server_ipv4_tcp(port);
         }
     } else if ((strcmp(type, "ipv4")== 0) && (strcmp(param, "udp") == 0)) {
         if(strcmp(side, "c")== 0){
             printf("handle_client_ipv4_tcp %s %s\n",type,param);
-            //handle_client_ipv4_udp();
+            handle_client_ipv4_udp(ip, port);
         }else{
             printf("handle_server_ipv4_udp %s %s\n",type,param);
-            //handle_server_ipv4_udp();
+            handle_server_ipv4_udp(port);
         }
         
     } else if ((strcmp(type, "ipv6")== 0) && (strcmp(param, "tcp") == 0)) {
         if(strcmp(side, "c")== 0){
             printf("handle_client_ipv6_tcp %s %s\n",type,param);
-            //handle_client_ipv6_tcp();
+            handle_client_ipv6_tcp(ip, port);
         }else{
             printf("handle_server_ipv6_tcp %s %s\n",type,param);
-            //handle_server_ipv6_tcp();
+            handle_server_ipv6_tcp(port);
         }
         
     } else if ((strcmp(type, "ipv6")== 0) && (strcmp(param, "udp") == 0)) {
         
         if(strcmp(side, "c")== 0){
             printf("handle_client_ipv6_udp %s %s\n",type,param);
-            //handle_client_ipv6_udp();
+            handle_client_ipv6_udp(ip, port);
         }else{
             printf("handle_server_ipv6_udp %s %s\n",type,param);
-            //handle_server_ipv6_udp();
+            handle_server_ipv6_udp(port);
         }
     } else if ((strcmp(type, "uds")== 0) && (strcmp(param, "dgram") == 0)) {
         

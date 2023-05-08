@@ -11,7 +11,7 @@
 
 #define MAX_BUFFER_SIZE 1024
 
-int create_socket() {
+int create_socket_ipv6_udp() {
     int sockfd = socket(AF_INET6, SOCK_DGRAM, 0);
     if (sockfd < 0) {
         perror("socket");
@@ -20,8 +20,8 @@ int create_socket() {
     return sockfd;
 }
 
-void connect_server(char *ip, int port) {
-    int sockfd = create_socket();
+void handle_client_ipv6_udp(char *ip, int port) {
+    int sockfd = create_socket_ipv6_udp();
     struct sockaddr_in6 servaddr;
     memset(&servaddr, 0, sizeof(servaddr));
     servaddr.sin6_family = AF_INET6;
@@ -41,7 +41,6 @@ void connect_server(char *ip, int port) {
 
     char buffer[MAX_BUFFER_SIZE];
     int bytes_sent = 0;
-    int total_bytes_sent = 0;
 
     printf("Starting to send the file\n");
     while (1) {
@@ -62,9 +61,9 @@ void connect_server(char *ip, int port) {
     close(sockfd);
 }
 
-void start_server(int port)
+void handle_server_ipv6_udp(int port)
 {
-    int sockfd = create_socket();
+    int sockfd = create_socket_ipv6_udp();
     struct sockaddr_in6 servaddr, cliaddr;
     memset(&servaddr, 0, sizeof(servaddr));
     memset(&cliaddr, 0, sizeof(cliaddr));
@@ -116,33 +115,33 @@ void start_server(int port)
     }
 }
 
-int main(int argc, char *argv[])
-{
-    if (argc < 2)
-    {
-        printf("Usage: %s [-c IP PORT] | [-s PORT]\n", argv[0]);
-        exit(EXIT_FAILURE);
-    }
-    int c;
-    char *ip = NULL;
-    int port = 0;
-    while ((c = getopt(argc, argv, "c:s:")) != -1)
-    {
-        switch (c)
-        {
-        case 'c':
-            ip = argv[2];
-            port = atoi(argv[3]);
-            connect_server(ip, port);
-            break;
-        case 's':
-            port = atoi(argv[2]);
-            start_server(port);
-            break;
-        default:
-            printf("Usage: %s [-c IP PORT] | [-s PORT]\n", argv[0]);
-            exit(EXIT_FAILURE);
-        }
-    }
-    return 0;
-}
+// int main(int argc, char *argv[])
+// {
+//     if (argc < 2)
+//     {
+//         printf("Usage: %s [-c IP PORT] | [-s PORT]\n", argv[0]);
+//         exit(EXIT_FAILURE);
+//     }
+//     int c;
+//     char *ip = NULL;
+//     int port = 0;
+//     while ((c = getopt(argc, argv, "c:s:")) != -1)
+//     {
+//         switch (c)
+//         {
+//         case 'c':
+//             ip = argv[2];
+//             port = atoi(argv[3]);
+//             handle_client_ipv6_udp(ip, port);
+//             break;
+//         case 's':
+//             port = atoi(argv[2]);
+//             handle_server_ipv6_udp(port);
+//             break;
+//         default:
+//             printf("Usage: %s [-c IP PORT] | [-s PORT]\n", argv[0]);
+//             exit(EXIT_FAILURE);
+//         }
+//     }
+//     return 0;
+// }
