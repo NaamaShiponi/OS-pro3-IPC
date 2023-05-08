@@ -20,13 +20,21 @@ TCP_TIME_O= $(TCP_TIME_C:.c=.o)
 IPV6_TCP_C= ipv6_tcp.c
 IPV6_TCP_O= $(IPV6_TCP_C:.c=.o) 
 
+#-ipv6 udp
+IPV6_UDP_C= ipv6_udp.c
+IPV6_UDP_O= $(IPV6_UDP_C:.c=.o) 
+
 #-ipv4 udp
 IPV4_UDP_C=ipv4_udp.c
 IPV4_UDP_O= $(IPV4_UDP_C:.c=.o)
 
+#-ipv4 tcp
+IPV4_TCP_C=ipv4_tcp.c
+IPV4_TCP_O= $(IPV4_TCP_C:.c=.o)
+
 
 #ALL FILE
-OBJS = $(STNC_O) $(TCP_TIME_O) $(IPV6_TCP_O) $(PART_A_O) $(IPV4_UDP_O) 
+OBJS = $(STNC_O) $(TCP_TIME_O) $(IPV6_TCP_O) $(PART_A_O) $(IPV4_UDP_O) $(IPV6_UDP_O) $(IPV4_TCP_O)
 ALLFILES = $(OBJS) $(STNC_C:.c=) 
 
 all: stnc
@@ -46,7 +54,13 @@ $(TCP_TIME_O): $(TCP_TIME_C)
 $(IPV6_TCP_O): $(IPV6_TCP_C)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+$(IPV6_UDP_O): $(IPV6_UDP_C)
+	$(CC) $(CFLAGS) -c $< -o $@
+
 $(IPV4_UDP_O): $(IPV4_UDP_C)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(IPV4_TCP_O): $(IPV4_TCP_C)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
