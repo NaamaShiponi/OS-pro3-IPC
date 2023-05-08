@@ -31,7 +31,7 @@ void connect_server(char *ip, int port) {
         perror("connect");
         exit(EXIT_FAILURE);
     }
-    printf("Connected to server at %s:%d (%s, %s)\n", ip, port, "ipv6", "udp");
+    printf("Connected to server at %s IPv6 on port %d using UDP\n", ip, port);
 
     char buffer[MAX_BUFFER_SIZE];
     fd_set set;
@@ -80,7 +80,7 @@ void start_server(int port)
         perror("bind");
         exit(EXIT_FAILURE);
     }
-    printf("Listening on port %d (%s, %s)\n", port, "ipv6", "udp");
+    printf("Listening on port %d (IPv6, UDP)\n", port);
 
     socklen_t cliaddrlen = sizeof(cliaddr);
 

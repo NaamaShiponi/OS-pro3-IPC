@@ -33,7 +33,7 @@ void connect_server(char *ip, int port)
         perror("connect");
         exit(EXIT_FAILURE);
     }
-    printf("Connected to server at %s:%d (%s, %s)\n", ip, port, "ipv4", "udp");
+    printf("Connected to server at %s IPv4 on port %d using UDP\n", ip, port);
 
     char buffer[MAX_BUFFER_SIZE];
     fd_set set;
@@ -89,7 +89,7 @@ void start_server(int port)
         perror("bind");
         exit(EXIT_FAILURE);
     }
-    printf("Listening on port %d (%s, %s)\n", port, "ipv4", "udp");
+    printf("Listening on port %d (IPv4, UDP)\n", port);
 
     socklen_t cliaddrlen = sizeof(cliaddr);
 
