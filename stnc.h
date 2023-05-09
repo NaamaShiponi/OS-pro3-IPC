@@ -1,12 +1,7 @@
 #ifndef STNC_H
 #define STNC_H
-#include "part_a.c"
 #include "tcp_time.c"
-#include "ipv4_tcp.c"
-#include "ipv6_tcp.c"
-#include "ipv4_udp.c"
-#include "ipv6_udp.c"
-#include "create_file_100MB.c"
+
 
 
 //PART A FUNCTIONS
@@ -19,7 +14,8 @@ void part_a_connect_server(char *ip, int port);
 void server_tcp_time();
 void client_tcp_time();
 void send_start();
-void send_end();
+void send_stop();
+void resvFun();
 
 //100MB file
 void create_file();

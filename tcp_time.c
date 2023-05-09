@@ -9,7 +9,7 @@
 
 #define PORT 7521
 #define MESSAGE_SIZE 1024
-int sockfd;
+int sockfd_tcp_time,sockfd_s,newsockfd;
 
 void error(const char *msg)
 {
@@ -30,7 +30,7 @@ void send_start(){
     char buffer[MESSAGE_SIZE];
 
     strcpy(buffer, "start");
-    int n = send(sockfd, buffer, strlen(buffer), 0);
+    int n = send(sockfd_tcp_time, buffer, strlen(buffer), 0);
     if (n < 0)
     {
         error("ERROR writing to socket");
@@ -39,35 +39,30 @@ void send_start(){
     }
 }
 
-void send_end(){
+void send_stop(){
     char buffer[MESSAGE_SIZE];
 
     strcpy(buffer, "stop");
-    int n = send(sockfd, buffer, strlen(buffer), 0);
+    int n = send(sockfd_tcp_time, buffer, strlen(buffer), 0);
     if (n < 0)
     {
         error("ERROR writing to socket");
     }else{
-        printf("send start\n");
+        printf("send stop\n");
     }
 
-    n = recv(sockfd, buffer, MESSAGE_SIZE - 1, 0);
-    if (n < 0)
-    {
-        error("ERROR reading from socket");
-    }
-
-    printf("Client received message: %s\n", buffer);
-
-    close(sockfd);
+    close(sockfd_tcp_time);
 }
+
+
+
 void client_tcp_time(){
     int portno;
     struct sockaddr_in serv_addr;
     srand(time(NULL));
     // Client mode.
-        sockfd = socket(AF_INET, SOCK_STREAM, 0);
-        if (sockfd < 0)
+        sockfd_tcp_time = socket(AF_INET, SOCK_STREAM, 0);
+        if (sockfd_tcp_time < 0)
         {
             error("ERROR opening socket");
         }
@@ -83,9 +78,11 @@ void client_tcp_time(){
             error("ERROR invalid server address");
         }
 
-        if (connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+        if (connect(sockfd_tcp_time, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
         {
             error("ERROR connecting to server");
+        }else {
+            printf("accept to TCP soket in server\n");
         }
 
 }
@@ -93,17 +90,17 @@ void client_tcp_time(){
 
 void server_tcp_time()
 {
-    time_t start_time;
-    int sockfd, newsockfd, portno;
+    // time_t start_time;
+    int portno;
     socklen_t clilen;
     char buffer[MESSAGE_SIZE];
     struct sockaddr_in serv_addr, cli_addr;
-    int n;
+    // int n;
     srand(time(NULL));
 
     // Server mode.
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0)
+    sockfd_s = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd_s < 0)
     {
         error("ERROR opening socket");
     }
@@ -115,62 +112,88 @@ void server_tcp_time()
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(portno);
     int yes = 1;
-    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+    if (setsockopt(sockfd_s, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
         error("ERROR setting socket option");
     }
-    if (bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+    if (bind(sockfd_s, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
     {
         error("ERROR on binding");
     }
     
-    listen(sockfd, 5);
+    listen(sockfd_s, 5);
     clilen = sizeof(cli_addr);
-    newsockfd = accept(sockfd, (struct sockaddr *)&cli_addr, &clilen);
+    newsockfd = accept(sockfd_s, (struct sockaddr *)&cli_addr, &clilen);
     if (newsockfd < 0)
     {
         error("ERROR on accept");
+    }else{
+        printf("client accept to TCP soket\n");
     }
 
     bzero(buffer, MESSAGE_SIZE);
+
+
+    // n = recv(newsockfd, buffer, MESSAGE_SIZE - 1, 0);
+    // if (n < 0)
+    // {
+    //     error("ERROR reading from socket");
+    // }
+
+    // printf("Server received message: %s\n", buffer);
+
+    // if (strcmp(buffer, "start") == 0)
+    // {
+    //     start_time = time(NULL);
+    //     printf("get start");
+    //     bzero(buffer, MESSAGE_SIZE);
+    // }
+    
+
+    // n = recv(newsockfd, buffer, MESSAGE_SIZE - 1, 0);
+    // if (strcmp(buffer, "stop") == 0)
+    // {
+    //     printf("get stop");
+    //     bzero(buffer, MESSAGE_SIZE);
+    //     long long total_time = time_since(start_time);
+    //     printf("Timer stopped. Remaining seconds: %lld\n", total_time);
+    //     sprintf(buffer, "%lld", total_time);
+    // }
+
+
+    // close(newsockfd);
+    // close(sockfd_s);
+}
+
+void resvFun(){
+    time_t start_time;
+    char buffer[MESSAGE_SIZE];
+    int n;
+
     n = recv(newsockfd, buffer, MESSAGE_SIZE - 1, 0);
     if (n < 0)
     {
         error("ERROR reading from socket");
     }
-
-    printf("Server received message: %s\n", buffer);
 
     if (strcmp(buffer, "start") == 0)
     {
         start_time = time(NULL);
+        printf("get start\n");
+        bzero(buffer, MESSAGE_SIZE);
     }
-    printf("get start");
-    bzero(buffer, MESSAGE_SIZE);
-
-    n = recv(newsockfd, buffer, MESSAGE_SIZE - 1, 0);
-    if (n < 0)
-    {
-        error("ERROR reading from socket");
-    }
-    printf("get end");
-
-    printf("Server received message: %s\n", buffer);
-
+    
     if (strcmp(buffer, "stop") == 0)
     {
+        printf("get stop\n");
+        bzero(buffer, MESSAGE_SIZE);
         long long total_time = time_since(start_time);
         printf("Timer stopped. Remaining seconds: %lld\n", total_time);
         sprintf(buffer, "%lld", total_time);
-    }
-    
-    n = send(newsockfd, buffer, strlen(buffer), 0);
-    if (n < 0)
-    {
-        error("ERROR writing to socket");
+        close(newsockfd);
+        exit(1);
     }
 
-    close(newsockfd);
-    close(sockfd);
+    
 }
 
 

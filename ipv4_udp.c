@@ -8,6 +8,8 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <errno.h>
+#include "stnc.h"
+
 
 #define MAX_BUFFER_SIZE 1024
 
@@ -46,6 +48,7 @@ void handle_client_ipv4_udp(char *ip, int port)
     char buffer[MAX_BUFFER_SIZE];
     size_t bytes_read = 0;
     printf("Starting to send the file\n");
+    send_start();
     while ((bytes_read = fread(buffer, 1, MAX_BUFFER_SIZE, fp)) > 0)
     {
         int bytes_sent = send(sockfd, buffer, bytes_read, 0);
@@ -55,6 +58,7 @@ void handle_client_ipv4_udp(char *ip, int port)
             exit(EXIT_FAILURE);
         }
     }
+    send_stop();
     printf("The entire file has been sent\n");
     printf("Closes the connection with the server at %s on port %d using UDP\n", ip, port);
 
@@ -87,63 +91,24 @@ void handle_server_ipv4_udp(int port)
 
     while (1)
     {
-        FD_SET(STDIN_FILENO, &set);
+        FD_SET(newsockfd, &set);
         FD_SET(sockfd, &set);
-        int max_fd = sockfd > STDIN_FILENO ? sockfd : STDIN_FILENO;
+        int max_fd = newsockfd > sockfd ? newsockfd : sockfd;
         select(max_fd + 1, &set, NULL, NULL, NULL);
+
         if (FD_ISSET(sockfd, &set))
         {
             int bytes_recv = recvfrom(sockfd, buffer, MAX_BUFFER_SIZE, 0,
                                       (struct sockaddr *)&cliaddr, &cliaddrlen);
             if (bytes_recv < 0)
             {
-                perror("recvfrom");
+                perror("recv");
                 exit(EXIT_FAILURE);
             }
         }
-        if (FD_ISSET(STDIN_FILENO, &set))
+        if (FD_ISSET(newsockfd, &set))
         {
-            if (fgets(buffer, MAX_BUFFER_SIZE, stdin) != NULL)
-            {
-                int bytes_sent = sendto(sockfd, buffer, strlen(buffer), 0,
-                                        (struct sockaddr *)&cliaddr, sizeof(cliaddr));
-                if (bytes_sent < 0)
-                {
-                    perror("sendto");
-                    exit(EXIT_FAILURE);
-                }
-            }
+            resvFun();         
         }
     }
 }
-
-// int main(int argc, char *argv[])
-// {
-//     if (argc < 2)
-//     {
-//         printf("Usage: %s [-c IP PORT] | [-s PORT]\n", argv[0]);
-//         exit(EXIT_FAILURE);
-//     }
-//     int c;
-//     char *ip = NULL;
-//     int port = 0;
-//     while ((c = getopt(argc, argv, "c:s:")) != -1)
-//     {
-//         switch (c)
-//         {
-//         case 'c':
-//             ip = argv[2];
-//             port = atoi(argv[3]);
-//             handle_client_ipv4_udp(ip, port);
-//             break;
-//         case 's':
-//             port = atoi(argv[2]);
-//             handle_server_ipv4_udp(port);
-//             break;
-//         default:
-//             printf("Usage: %s [-c IP PORT] | [-s PORT]\n", argv[0]);
-//             exit(EXIT_FAILURE);
-//         }
-//     }
-//     return 0;
-// }

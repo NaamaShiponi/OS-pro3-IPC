@@ -8,6 +8,8 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <errno.h>
+// #include "tcp_time.c"
+#include "stnc.h"
 
 #define MAX_BUFFER_SIZE 1024
 
@@ -48,6 +50,7 @@ void handle_client_ipv4_tcp(char *ip, int port)
 
     // Send the file in chunks of MAX_BUFFER_SIZE bytes
     printf("Starting to send the file\n");
+    send_start();
     while (bytes_read > 0) {
         int bytes_sent = send(sockfd, buffer, bytes_read, 0);
         if (bytes_sent < 0)
@@ -57,6 +60,7 @@ void handle_client_ipv4_tcp(char *ip, int port)
         }
         bytes_read = fread(buffer, sizeof(char), MAX_BUFFER_SIZE, file);
     }
+    send_stop();
     printf("The entire file has been sent\n");
     printf("Closes the connection with the server at %s on port %d using TCP\n", ip, port);
 
@@ -98,10 +102,11 @@ void handle_server_ipv4_tcp(int port)
 
     while (1)
     {
-        FD_SET(STDIN_FILENO, &set);
+        FD_SET(newsockfd, &set);
         FD_SET(connfd, &set);
-        int max_fd = connfd > STDIN_FILENO ? connfd : STDIN_FILENO;
+        int max_fd = newsockfd > connfd ? newsockfd : connfd;
         select(max_fd + 1, &set, NULL, NULL, NULL);
+
         if (FD_ISSET(connfd, &set))
         {
             int bytes_recv = recv(connfd, buffer, MAX_BUFFER_SIZE, 0);
@@ -110,54 +115,10 @@ void handle_server_ipv4_tcp(int port)
                 perror("recv");
                 exit(EXIT_FAILURE);
             }
-            else if (bytes_recv == 0)
-            {
-                printf("Client disconnected\n");
-                exit(EXIT_SUCCESS);
-            }
         }
-        if (FD_ISSET(STDIN_FILENO, &set))
+        if (FD_ISSET(newsockfd, &set))
         {
-            if (fgets(buffer, MAX_BUFFER_SIZE, stdin) != NULL)
-            {
-                int bytes_sent = send(connfd, buffer, strlen(buffer), 0);
-                if (bytes_sent < 0)
-                {
-                    perror("send");
-                    exit(EXIT_FAILURE);
-                }
-            }
+            resvFun();         
         }
     }
 }
-
-// int main(int argc, char *argv[])
-// {
-//     if (argc < 2)
-//     {
-//         printf("Usage: %s [-c IP PORT] | [-s PORT]\n", argv[0]);
-//         exit(EXIT_FAILURE);
-//     }
-//     int c;
-//     char *ip = NULL;
-//     int port = 0;
-//     while ((c = getopt(argc, argv, "c:s:")) != -1)
-//     {
-//         switch (c)
-//         {
-//         case 'c':
-//             ip = argv[2];
-//             port = atoi(argv[3]);
-//             handle_client_ipv4_tcp(ip, port);
-//             break;
-//         case 's':
-//             port = atoi(argv[2]);
-//             handle_server_ipv4_tcp(port);
-//             break;
-//         default:
-//             printf("Usage: %s [-c IP PORT] | [-s PORT]\n", argv[0]);
-//             exit(EXIT_FAILURE);
-//         }
-//     }
-//     return 0;
-// }

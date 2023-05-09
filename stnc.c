@@ -9,6 +9,14 @@
 #include <netdb.h>
 #include <errno.h>
 #include "stnc.h"
+#include "part_a.c"
+#include "ipv4_tcp.c"
+#include "ipv4_udp.c"
+#include "ipv6_tcp.c"
+#include "ipv6_udp.c"
+#include "create_file_100MB.c"
+
+
 
 void ClassifiedCommunication(char *side,char *ip, int port,char *type,char *param){
     if ((strcmp(type, "ipv4") == 0) && (strcmp(param, "tcp") == 0)) {
@@ -111,6 +119,9 @@ int main(int argc, char *argv[])
             if(argc >= 6){
                 type = argv[4];
                 param = argv[5];
+                 create_file();
+                client_tcp_time();
+                sleep(2);
                 ClassifiedCommunication("c",ip, port,type,param);
             }else{
                 part_a_connect_server(ip, port);
@@ -121,6 +132,7 @@ int main(int argc, char *argv[])
             if(argc >= 5){
                 type = argv[3];
                 param = argv[4];
+                server_tcp_time();
                 ClassifiedCommunication("s","",port,type,param);
 
             }else{
