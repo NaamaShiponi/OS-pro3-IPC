@@ -19,21 +19,21 @@ void create_file() {
     }
 
     // //100MB
-    // for (i = 0; i < 10000000L; i++) { 
-    //     fputc('a', fp);
-    // }
-
-    //100kB
-    for (i = 0; i < 10000L; i++) { 
+    for (i = 0; i < 10000000L; i++) { 
         fputc('a', fp);
     }
+
+    //100kB
+    // for (i = 0; i < 10000L; i++) { 
+    //     fputc('a', fp);
+    // }
 
     fclose(fp);
     printf("File created successfully\n");
 }
 
 
-int main() {
-    create_file();
-    return 0;
-}
+// int main() {
+//     create_file();
+//     return 0;
+// }
