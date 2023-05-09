@@ -6,6 +6,7 @@
 #include "ipv6_tcp.c"
 #include "ipv4_udp.c"
 #include "ipv6_udp.c"
+#include "create_file_100MB.c"
 
 
 //PART A FUNCTIONS
@@ -19,6 +20,9 @@ void server_tcp_time();
 void client_tcp_time();
 void send_start();
 void send_end();
+
+//100MB file
+void create_file();
 
 void handle_client_ipv4_tcp(char *ip, int port);
 void handle_server_ipv4_tcp(int port);
