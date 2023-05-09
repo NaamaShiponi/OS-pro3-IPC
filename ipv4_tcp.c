@@ -38,7 +38,7 @@ void handle_client_ipv4_tcp(char *ip, int port)
     printf("Connected to server at %s IPv4 on port %d using TCP\n", ip, port);
     
     // Open the file and read its contents
-    FILE* file = fopen("100MB-File.c", "rb");
+    FILE* file = fopen("100MB-File.txt", "rb");
     if (!file) {
         perror("fopen");
         exit(EXIT_FAILURE);

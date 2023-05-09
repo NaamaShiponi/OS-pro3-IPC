@@ -33,7 +33,7 @@ void handle_client_ipv6_udp(char *ip, int port) {
     }
     printf("Connected to server at %s IPv6 on port %d using UDP\n", ip, port);
 
-    FILE *file = fopen("100MB-File.c", "rb");
+    FILE *file = fopen("100MB-File.txt", "rb");
     if (file == NULL) {
         perror("fopen");
         exit(EXIT_FAILURE);

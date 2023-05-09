@@ -39,7 +39,7 @@ void handle_client_ipv6_tcp(char *ip, int port)
 
     // Open the file for reading
     FILE *fp;
-    fp = fopen("100MB-File.c", "rb");
+    fp = fopen("100MB-File.txt", "rb");
     if (fp == NULL)
     {
         perror("fopen");

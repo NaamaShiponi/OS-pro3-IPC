@@ -35,7 +35,7 @@ void handle_client_ipv4_udp(char *ip, int port)
     printf("Connected to server at %s IPv4 on port %d using UDP\n", ip, port);
 
     // Open file
-    FILE *fp = fopen("100MB-File.c", "r");
+    FILE *fp = fopen("100MB-File.txt", "r");
     if (!fp)
     {
         perror("fopen");
