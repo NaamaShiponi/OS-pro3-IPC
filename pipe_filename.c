@@ -1,67 +1,64 @@
-#include <unistd.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <poll.h>
+#include <string.h>
 
-#define PIPE_NAME "my_pipe"
+#define FILE_PIPE "file_pipe"
 
 void handle_server_pipe_filename() {
-    int fd;
-    size_t bytes_read, total_bytes_read = 0;
-    char file_buf[1024];
-    mkfifo(PIPE_NAME, 0666);
-    fd = open(PIPE_NAME, O_RDONLY);
+    int fd, bytes_read;
+    char buffer[1024];
+    struct pollfd pfd;
 
+    // create the named pipe
+    mkfifo(FILE_PIPE, 0666);
+
+    // open the named pipe for reading
+    fd = open(FILE_PIPE, O_RDONLY);
+
+    // poll for events
+    pfd.fd = fd;  // fd: The file descriptor to be monitored
+    pfd.events = POLLIN;  // The events to monitor for, POLLIN for data to read
+        
     printf("Server open for received message\n");
-    // Gets the content found in the file through the pipe
-    while ((bytes_read = read(fd, file_buf, sizeof(file_buf))) > 0) {
-    if (bytes_read == -1) {
-            perror("read");
-            exit(EXIT_FAILURE);
-        }
-    }
 
-    printf("Server received message\n");    
+    do {
+        // wait for an event
+        poll(&pfd, 1, -1);
 
+    // read the data from the pipe
+    } while (read(fd, buffer, sizeof(buffer)) > 0);
+
+    printf("Server received message\n");
+    
+    // close the pipe and remove the file
     close(fd);
-    fd = open(PIPE_NAME, O_WRONLY);
-
-    // The server sends that it received
-    printf("The server sends that it received\n"); 
-    write(fd, "Message received", 17);
-    close(fd);
-    unlink(PIPE_NAME);
+    unlink(FILE_PIPE);
 }
 
 
 void handle_client_pipe_filename() {
     int fd;
-    char buf[100];
-    char file_buf[1024];
-    size_t bytes_read;
-    fd = open(PIPE_NAME, O_WRONLY);
+    char buffer[1024];
 
-    // Open and send contents of 100MB-File.txt
-    FILE *fp = fopen("100MB-File.txt", "r");
-    if (fp == NULL) {
-        perror("Failed to open file");
-        exit(1);
-    }
+    // open the named pipe for writing
+    fd = open(FILE_PIPE, O_WRONLY);
 
-    // The client reads from the file and sends it
-    while ((bytes_read = fread(file_buf, 1, sizeof(file_buf), fp)) > 0) {
-        write(fd, file_buf, bytes_read);
+    // open the file to be sent
+    FILE* fp = fopen("100MB-File.txt", "r");
+
+    // read the contents of the file and write them to the pipe
+    printf("The client reads from the 100MB-File.txt file and write them to the pipe\n");
+    while (fgets(buffer, sizeof(buffer), fp)) {
+        write(fd, buffer, sizeof(buffer));
     }
+    printf("The client has finished sending the file through the pipe\n");
+
+    // close the file and the pipe
     fclose(fp);
-
-    close(fd);
-    fd = open(PIPE_NAME, O_RDONLY);
-    // The client received the confirmation that the server received
-    read(fd, buf, sizeof(buf));
-    printf("Client received message: %s\n", buf);
     close(fd);
 }
 
