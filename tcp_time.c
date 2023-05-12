@@ -6,6 +6,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <time.h>
+#include <sys/time.h>
 
 #define PORT 7521
 #define MESSAGE_SIZE 1024
@@ -17,14 +18,18 @@ void error(const char *msg)
     exit(1);
 }
 
-long long time_since(time_t start_time) {
-    struct timespec current_time;
-    clock_gettime(CLOCK_REALTIME, &current_time);
+float time_since( struct timeval start) {
+    struct timeval end;
+    gettimeofday(&end, 0);
+    float milliseconds = (end.tv_sec - start.tv_sec) * 1000.0f + (end.tv_usec - start.tv_usec) / 1000.0f;
+    return milliseconds;
+    // struct timespec current_time;
+    // clock_gettime(CLOCK_REALTIME, &current_time);
 
-    long long start_ms = ((long long)start_time * 1000LL);
-    long long current_ms = ((long long)current_time.tv_sec * 1000LL) + (current_time.tv_nsec / 1000000LL);
+    // long long start_ms = ((long long)start_time * 1000LL);
+    // long long current_ms = ((long long)current_time.tv_sec * 1000LL) + (current_time.tv_nsec / 1000000LL);
 
-    return current_ms - start_ms;
+    // return current_ms - start_ms;
 }
 void send_start(){
     char buffer[MESSAGE_SIZE];
@@ -39,8 +44,9 @@ void send_start(){
     }
 }
 
+
 void send_stop(){
-    char buffer[MESSAGE_SIZE];
+    char buffer [MESSAGE_SIZE];
 
     strcpy(buffer, "stop");
     int n = send(sockfd_tcp_time, buffer, strlen(buffer), 0);
@@ -53,6 +59,7 @@ void send_stop(){
 
     close(sockfd_tcp_time);
 }
+
 
 
 
@@ -165,7 +172,8 @@ void server_tcp_time()
 }
 
 void resvFun(){
-    time_t start_time;
+    // time_t start_time;
+    struct timeval start;
     char buffer[MESSAGE_SIZE];
     int n;
 
@@ -177,20 +185,26 @@ void resvFun(){
 
     if (strcmp(buffer, "start") == 0)
     {
-        start_time = time(NULL);
+        // start_time = time(NULL);
+        
+        gettimeofday(&start, 0);
         printf("get start\n");
         bzero(buffer, MESSAGE_SIZE);
-    }
-    
-    if (strcmp(buffer, "stop") == 0)
+        // strcmp(buffer, "stop")
+    }else if (strcmp(buffer, "stop") == 0)
     {
         printf("get stop\n");
         bzero(buffer, MESSAGE_SIZE);
-        long long total_time = time_since(start_time);
-        printf("Timer stopped. Remaining seconds: %lld\n", total_time);
-        sprintf(buffer, "%lld", total_time);
+        // long long total_time = time_since(start_time);
+        float total_time = time_since(start);
+        
+        printf("Timer stopped. Remaining seconds: %f\n", total_time);
+        // sprintf(buffer, "%f", total_time);
         close(newsockfd);
         exit(1);
+    }else{
+         printf("resvFun!!!!! %s\n",buffer);
+
     }
 
     
