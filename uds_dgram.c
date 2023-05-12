@@ -4,6 +4,9 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <sys/time.h>
+#include "stnc.h"
+
 
 #define SOCK_PATH "/tmp/uds_socket"
 #define FILE_PATH "100MB-File.txt"
@@ -31,6 +34,9 @@ void handle_server_uds_dgram() {
         exit(1);
     }
 
+        struct timeval start;
+        gettimeofday(&start, 0);
+        
     // Receive message from client
     clilen = sizeof(cli_addr);
     while (total_bytes_received < 10000) {
@@ -42,8 +48,10 @@ void handle_server_uds_dgram() {
         }
         total_bytes_received += bytes_recv;
     }
-
-    printf("Received message from client: %d\n", total_bytes_received);
+    float total_time = time_since(start);
+    printf("uds_dgram,%f\n", total_time);
+    
+    // printf("Received message from client: %d\n", total_bytes_received);
 
     close(sockfd);
     unlink(serv_addr.sun_path);
@@ -128,22 +136,22 @@ void handle_client_uds_dgram() {
 //     close(sockfd);
 // }
 
-int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        printf("Usage: %s [-c/-s]\n", argv[0]);
-        return 1;
-    }
+// int main(int argc, char *argv[]) {
+//     if (argc != 2) {
+//         printf("Usage: %s [-c/-s]\n", argv[0]);
+//         return 1;
+//     }
 
-    if (strcmp(argv[1], "-s") == 0) {
-        printf("Starting server...\n");
-        handle_server_uds_dgram();
-    } else if (strcmp(argv[1], "-c") == 0) {
-        printf("Starting client...\n");
-        handle_client_uds_dgram();
-    } else {
-        printf("Usage: %s [-c/-s]\n", argv[0]);
-        return 1;
-    }
+//     if (strcmp(argv[1], "-s") == 0) {
+//         printf("Starting server...\n");
+//         handle_server_uds_dgram();
+//     } else if (strcmp(argv[1], "-c") == 0) {
+//         printf("Starting client...\n");
+//         handle_client_uds_dgram();
+//     } else {
+//         printf("Usage: %s [-c/-s]\n", argv[0]);
+//         return 1;
+//     }
 
-    return 0;
-}
+//     return 0;
+// }
