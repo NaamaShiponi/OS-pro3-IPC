@@ -14,7 +14,7 @@
 void handle_client_uds_stream()
 {
     struct sockaddr_un addr;
-    int fd, bytes_sent, bytes_received;
+    int fd, bytes_sent;
     char buffer[BUFFER_SIZE];
     FILE *fp;
 
@@ -44,9 +44,13 @@ void handle_client_uds_stream()
         perror("fopen");
         exit(EXIT_FAILURE);
     }
-    // send_start();
+
     // send file to the server
-    printf("Starting to send the file\n");
+    if (p_flag)
+    {
+        printf("Starting to send the file\n");
+    }
+    
     while (!feof(fp))
     {
         bytes_sent = fread(buffer, 1, BUFFER_SIZE, fp);
@@ -62,21 +66,11 @@ void handle_client_uds_stream()
         memset(&buffer, 0, sizeof(buffer));
     }
     // send_stop();
-    printf("The entire file has been sent\n");
-
+    if(p_flag){
+        printf("The entire file has been sent\n");
+    }
     // close the file
     fclose(fp);
-
-    // receive acknowledgement from the server
-    if ((bytes_received = read(fd, buffer, BUFFER_SIZE)) == -1)
-    {
-        perror("read");
-        exit(EXIT_FAILURE);
-    }
-
-    // print the acknowledgement
-    printf("Received: %s\n", buffer);
-    printf("Closes the connection with the server using uds stream\n");
 
     // close the connection
     close(fd);
@@ -85,7 +79,7 @@ void handle_client_uds_stream()
 void handle_server_uds_stream()
 {
     struct sockaddr_un addr;
-    int fd, client_fd, bytes_received, total_bytes_received = 0;
+    int fd, client_fd, bytes_received;
     char buffer[BUFFER_SIZE];
 
     // create a socket
@@ -114,20 +108,20 @@ void handle_server_uds_stream()
         exit(EXIT_FAILURE);
     }
 
-    printf("Listening on uds stream\n");
-
+    if(p_flag){
+        printf("Listening on uds stream\n");
+    }
     // accept a connection
     if ((client_fd = accept(fd, NULL, NULL)) == -1)
     {
         perror("accept");
     }
 
-    printf("Client connected\n");
     struct timeval start;
     gettimeofday(&start, 0);
 
     // receive file from the client
-    while (total_bytes_received < 10000)
+    while (strstr(buffer, "x") == NULL && time_since(start)<3000)
     {
         bytes_received = read(client_fd, buffer, BUFFER_SIZE);
         if (bytes_received == -1)
@@ -135,31 +129,24 @@ void handle_server_uds_stream()
             perror("read");
             exit(EXIT_FAILURE);
         }
-
-        total_bytes_received += bytes_received;
     }
     float total_time = time_since(start);
+    if (p_flag) {
+        printf("The file has been received\n");
+    }
     printf("uds_stream,%f\n", total_time);
+
+    // close the client connection
+    close(client_fd);
+    close(fd);
 
     int status = remove(SOCKET_PATH);
     if (status != 0)
     {
         printf("Could not delete file. You will need to delete it manually before running uds stream again, run the command rm /tmp/socket_path\n");
     }
-    memset(&buffer, 0, sizeof(buffer));
-
-    // send acknowledgement to the client
-    if (write(client_fd, "ACK", sizeof("ACK")) == -1)
-    {
-        perror("write");
-    }
-
-    printf("File received. Total bytes received: %d\n", total_bytes_received);
-
-    // close the client connection
-    // close(client_fd);
-    // close(fd);
 }
+
 
 // int main(int argc, char **argv) {
 //     if (argc == 2 && strcmp(argv[1], "-s") == 0) {

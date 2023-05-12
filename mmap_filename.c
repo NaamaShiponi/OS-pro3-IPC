@@ -10,6 +10,8 @@
 #define SHARED_MEM_NAME "/my_shared_memory"
 #define SHARED_MEM_SIZE (1024*1024*1024) // 1 GB
 
+extern int p_flag;
+
 /**
  * To compile the code you need to write: gcc mmap_filename.c -o mmap_filename -lrt
  * Server: ./mmap_filename -s
@@ -34,35 +36,28 @@ void handle_server_mmap_filename() {
         exit(EXIT_FAILURE);
     }
 
+    if (p_flag) {
+        printf("Server open for received message with mmap filename\n");
+    }
+    
+
     char *str = (char*)addr;
 
-    // while (1) {
-    //     printf("Waiting for client message...\n");
+    while (*str == '\0') {}
 
-        while (*str == '\0') {
-            // sleep(1);
-        }
+    int count=0;
+    struct timeval start;
+    gettimeofday(&start, 0);
+    while (strstr(str, "x") == NULL ) {
+        count++;
+    }
+    float total_time = time_since(start);
 
-        int count=0;
-        struct timeval start;
-        gettimeofday(&start, 0);
-        while (strstr(str, "x") == NULL ) {
-            count++;
-        }
-        float total_time = time_since(start);
-        printf("mmap,%f\n", total_time);
-        // printf("count %d",count);
-        // printf("Received message: %s\n", str);
-
-        // strcpy(str, "Message received");
-        // printf("Received message: %s\n", str);
-
-        // printf("Sent confirmation to client\n");
-        // sleep(1);
-
-        // Reset the shared memory object
-        memset(addr, 0, SHARED_MEM_SIZE);
-    // }
+    if (p_flag) {
+        printf("The file has been received\n");
+    }
+    printf("mmap,%f\n", total_time);
+    memset(addr, 0, SHARED_MEM_SIZE);
 }
 
 void handle_client_mmap_filename() {
@@ -76,6 +71,10 @@ void handle_client_mmap_filename() {
     if (addr == MAP_FAILED) {
         perror("mmap");
         exit(EXIT_FAILURE);
+    }
+
+    if (p_flag) {
+        printf("The shared memory object was created successfully\n");
     }
 
     char *str = (char*)addr;
@@ -99,20 +98,12 @@ void handle_client_mmap_filename() {
     }
     fread(str, sizeof(char), file_size, fp);
 
+    if (p_flag) {
+        printf("The entire file has been sent\n");
+    }
+
     // Close the file
     fclose(fp);
-
-    printf("Waiting for confirmation from server...\n");
-
-    // while (1) {
-    //     sleep(1);
-    //     if (*str != '\0') {
-    //         printf("Received confirmation: %s\n", str);
-    //         break;
-    //     }
-
-    //     sleep(1);
-    // }
 }
 
 // int main(int argc, char *argv[]) {

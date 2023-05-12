@@ -20,82 +20,116 @@
 #include "pipe_filename.c"
 #include "create_file_100MB.c"
 
-
+int p_flag = 0;
 
 void ClassifiedCommunication(char *side,char *ip, int port,char *type,char *param){
     if ((strcmp(type, "ipv4") == 0) && (strcmp(param, "tcp") == 0)) {
         if(strcmp(side, "c")== 0){
-            printf("handle_client_ipv4_tcp %s %s\n",type,param);
+            if(p_flag){
+                printf("handle_client_ipv4_tcp %s %s\n",type,param);
+            }
             handle_client_ipv4_tcp(ip, port);
         }else{
-            printf("handle_server_ipv4_tcp %s %s\n",type,param);
+            if(p_flag){
+                printf("handle_server_ipv4_tcp %s %s\n",type,param);
+            }
             handle_server_ipv4_tcp(port);
         }
     } else if ((strcmp(type, "ipv4")== 0) && (strcmp(param, "udp") == 0)) {
         if(strcmp(side, "c")== 0){
-            printf("handle_client_ipv4_tcp %s %s\n",type,param);
+            if(p_flag){
+                printf("handle_client_ipv4_tcp %s %s\n",type,param);
+            }
             handle_client_ipv4_udp(ip, port);
         }else{
-            printf("handle_server_ipv4_udp %s %s\n",type,param);
+            if(p_flag){
+                printf("handle_server_ipv4_udp %s %s\n",type,param);
+            }
             handle_server_ipv4_udp(port);
         }
         
     } else if ((strcmp(type, "ipv6")== 0) && (strcmp(param, "tcp") == 0)) {
         if(strcmp(side, "c")== 0){
-            printf("handle_client_ipv6_tcp %s %s\n",type,param);
+            if(p_flag){
+                printf("handle_client_ipv6_tcp %s %s\n",type,param);
+            }
             handle_client_ipv6_tcp(ip, port);
         }else{
-            printf("handle_server_ipv6_tcp %s %s\n",type,param);
+            if(p_flag){
+                printf("handle_server_ipv6_tcp %s %s\n",type,param);
+            }
             handle_server_ipv6_tcp(port);
         }
         
     } else if ((strcmp(type, "ipv6")== 0) && (strcmp(param, "udp") == 0)) {
         
         if(strcmp(side, "c")== 0){
-            printf("handle_client_ipv6_udp %s %s\n",type,param);
+            if(p_flag){
+                printf("handle_client_ipv6_udp %s %s\n",type,param);
+            }
             handle_client_ipv6_udp(ip, port);
         }else{
-            printf("handle_server_ipv6_udp %s %s\n",type,param);
+            if(p_flag){
+                printf("handle_server_ipv6_udp %s %s\n",type,param);
+            }
             handle_server_ipv6_udp(port);
         }
     } else if ((strcmp(type, "uds")== 0) && (strcmp(param, "dgram") == 0)) {
         
         if(strcmp(side, "c")== 0){
-            printf("handle_client_uds_dgram %s %s\n",type,param);
+            if(p_flag){
+                printf("handle_client_uds_dgram %s %s\n",type,param);
+            }
             handle_client_uds_dgram();
         }else{
-            printf("handle_server_uds_dgram %s %s\n",type,param);
+            if(p_flag){
+                printf("handle_server_uds_dgram %s %s\n",type,param);
+            }
             handle_server_uds_dgram();
         }
     } else if ((strcmp(type, "uds")== 0) && (strcmp(param, "stream") == 0)) {
         
         if(strcmp(side, "c")== 0){
-            printf("handle_client_uds_stream %s %s\n",type,param);
+            if(p_flag){
+                printf("handle_client_uds_stream %s %s\n",type,param);
+            }
             handle_client_uds_stream();
         }else{
-            printf("handle_server_uds_stream %s %s\n",type,param);
+            if(p_flag){
+                printf("handle_server_uds_stream %s %s\n",type,param);
+            }
             handle_server_uds_stream();
         }
     } else if ((strcmp(type, "mmap")== 0) && (strcmp(param, "filename") == 0)) {
         
         if(strcmp(side, "c")== 0){
-            printf("handle_client_mmap_filename %s %s\n",type,param);
+            if(p_flag){
+                printf("handle_client_mmap_filename %s %s\n",type,param);
+            }
             handle_client_mmap_filename();
         }else{
-            printf("handle_server_mmap_filename %s %s\n",type,param);
+            if(p_flag){
+                printf("handle_server_mmap_filename %s %s\n",type,param);
+            }
             handle_server_mmap_filename();
         }
     } else if ((strcmp(type, "pipe")== 0) && (strcmp(param, "filename") == 0)) {
         
         if(strcmp(side, "c")== 0){
-            printf("handle_client_pipe_filename %s %s\n",type,param);
+            if(p_flag){
+                printf("handle_client_pipe_filename %s %s\n",type,param);
+            }
             handle_client_pipe_filename();
         }else{
-            printf("handle_server_pipe_filename %s %s\n",type,param);
+            if(p_flag){
+                printf("handle_server_pipe_filename %s %s\n",type,param);
+            }
             handle_server_pipe_filename();
         }
     } else {
-        printf("Unknown option: %s %s\n", type, param);
+        if(p_flag){
+            printf("Unknown option: %s %s\n", type, param);
+        }
     }
 
 }
