@@ -126,7 +126,7 @@ void handle_server_ipv4_tcp(int port)
             }
         }
         float total_time = time_since(start);
-        printf("Timer stopped. Remaining seconds: %f\n", total_time);    
+        printf("ipv4_tcp,%f\n", total_time);    
         //     printf("get the file\n");
             
         // }

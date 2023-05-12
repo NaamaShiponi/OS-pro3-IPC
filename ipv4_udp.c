@@ -121,5 +121,5 @@ void handle_server_ipv4_udp(int port)
     //     }
     // }
     float total_time = time_since(start);
-    printf("Timer stopped. Remaining seconds: %f\n", total_time);
+    printf("ipv4_udp,%f\n", total_time);
 }
