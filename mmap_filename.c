@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <sys/time.h>
+#include "stnc.h"
 
 #define SHARED_MEM_NAME "/my_shared_memory"
 #define SHARED_MEM_SIZE (1024*1024*1024) // 1 GB
@@ -34,24 +36,33 @@ void handle_server_mmap_filename() {
 
     char *str = (char*)addr;
 
-    while (1) {
-        printf("Waiting for client message...\n");
+    // while (1) {
+    //     printf("Waiting for client message...\n");
 
         while (*str == '\0') {
-            sleep(1);
+            // sleep(1);
         }
 
-        printf("Received message: %s\n", str);
+        int count=0;
+        struct timeval start;
+        gettimeofday(&start, 0);
+        while (strstr(str, "x") == NULL ) {
+            count++;
+        }
+        float total_time = time_since(start);
+        printf("mmap,%f\n", total_time);
+        // printf("count %d",count);
+        // printf("Received message: %s\n", str);
 
-        strcpy(str, "Message received");
-        printf("Received message: %s\n", str);
+        // strcpy(str, "Message received");
+        // printf("Received message: %s\n", str);
 
-        printf("Sent confirmation to client\n");
-        sleep(1);
+        // printf("Sent confirmation to client\n");
+        // sleep(1);
 
         // Reset the shared memory object
         memset(addr, 0, SHARED_MEM_SIZE);
-    }
+    // }
 }
 
 void handle_client_mmap_filename() {
@@ -93,30 +104,30 @@ void handle_client_mmap_filename() {
 
     printf("Waiting for confirmation from server...\n");
 
-    while (1) {
-        sleep(1);
-        if (*str != '\0') {
-            printf("Received confirmation: %s\n", str);
-            break;
-        }
+    // while (1) {
+    //     sleep(1);
+    //     if (*str != '\0') {
+    //         printf("Received confirmation: %s\n", str);
+    //         break;
+    //     }
 
-        sleep(1);
-    }
+    //     sleep(1);
+    // }
 }
 
-int main(int argc, char *argv[]) {
-    if (argc < 2) {
-        printf("Usage: mmap_filename -c for client or -s for server\n");
-        return 0;
-    }
+// int main(int argc, char *argv[]) {
+//     if (argc < 2) {
+//         printf("Usage: mmap_filename -c for client or -s for server\n");
+//         return 0;
+//     }
 
-    if (strcmp(argv[1], "-c") == 0) {
-        handle_client_mmap_filename();
-    } else if (strcmp(argv[1], "-s") == 0) {
-        handle_server_mmap_filename();
-    } else {
-        printf("Usage: mmap_filename -c for client or -s for server\n");
-    }
+//     if (strcmp(argv[1], "-c") == 0) {
+//         handle_client_mmap_filename();
+//     } else if (strcmp(argv[1], "-s") == 0) {
+//         handle_server_mmap_filename();
+//     } else {
+//         printf("Usage: mmap_filename -c for client or -s for server\n");
+//     }
 
-    return 0;
-}
+//     return 0;
+// }
