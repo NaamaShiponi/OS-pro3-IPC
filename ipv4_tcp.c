@@ -50,7 +50,7 @@ void handle_client_ipv4_tcp(char *ip, int port)
 
     // Send the file in chunks of MAX_BUFFER_SIZE bytes
     printf("Starting to send the file\n");
-    send_start();
+    // send_start();
     while (bytes_read > 0) {
         int bytes_sent = send(sockfd, buffer, bytes_read, 0);
         if (bytes_sent < 0)
@@ -60,13 +60,13 @@ void handle_client_ipv4_tcp(char *ip, int port)
         }
         bytes_read = fread(buffer, sizeof(char), MAX_BUFFER_SIZE, file);
     }
-    send_stop();
+    // send_stop();
     printf("The entire file has been sent\n");
     printf("Closes the connection with the server at %s on port %d using TCP\n", ip, port);
 
     // Close the file and socket
     fclose(file);
-    close(sockfd);
+    // close(sockfd);
 }
 
 void handle_server_ipv4_tcp(int port)
@@ -97,18 +97,27 @@ void handle_server_ipv4_tcp(int port)
     }
     char buffer[MAX_BUFFER_SIZE];
 
-    fd_set set;
-    FD_ZERO(&set);
+    // fd_set set;
+    // FD_ZERO(&set);
 
-    while (1)
-    {
-        FD_SET(newsockfd, &set);
-        FD_SET(connfd, &set);
-        int max_fd = newsockfd > connfd ? newsockfd : connfd;
-        select(max_fd + 1, &set, NULL, NULL, NULL);
+    // while (1)
+    // {
+    //     FD_SET(newsockfd, &set);
+    //     FD_SET(connfd, &set);
+    //     int max_fd = newsockfd > connfd ? newsockfd : connfd;
+    //     select(max_fd + 1, &set, NULL, NULL, NULL);
 
-        if (FD_ISSET(connfd, &set))
-        {
+    //     if (FD_ISSET(connfd, &set))
+    //     {
+        int count=0;
+
+        struct timeval start;
+        
+        while (strstr(buffer, "x") == NULL)
+        {        
+            count++;
+            if(count==1) gettimeofday(&start, 0);
+
             int bytes_recv = recv(connfd, buffer, MAX_BUFFER_SIZE, 0);
             if (bytes_recv < 0)
             {
@@ -116,9 +125,14 @@ void handle_server_ipv4_tcp(int port)
                 exit(EXIT_FAILURE);
             }
         }
-        if (FD_ISSET(newsockfd, &set))
-        {
-            resvFun();         
-        }
-    }
+        float total_time = time_since(start);
+        printf("Timer stopped. Remaining seconds: %f\n", total_time);    
+        //     printf("get the file\n");
+            
+        // }
+        // if (FD_ISSET(newsockfd, &set))
+        // {
+        //     resvFun();         
+        // }
+    // }
 }

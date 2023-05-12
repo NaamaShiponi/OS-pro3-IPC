@@ -48,7 +48,7 @@ void handle_client_ipv4_udp(char *ip, int port)
     char buffer[MAX_BUFFER_SIZE];
     size_t bytes_read = 0;
     printf("Starting to send the file\n");
-    send_start();
+    // send_start();
     while ((bytes_read = fread(buffer, 1, MAX_BUFFER_SIZE, fp)) > 0)
     {
         int bytes_sent = send(sockfd, buffer, bytes_read, 0);
@@ -58,13 +58,13 @@ void handle_client_ipv4_udp(char *ip, int port)
             exit(EXIT_FAILURE);
         }
     }
-    send_stop();
+    // send_stop();
     printf("The entire file has been sent\n");
     printf("Closes the connection with the server at %s on port %d using UDP\n", ip, port);
 
     // Close file and socket
     fclose(fp);
-    close(sockfd);
+    // close(sockfd);
 }
 
 void handle_server_ipv4_udp(int port)
@@ -86,18 +86,25 @@ void handle_server_ipv4_udp(int port)
     socklen_t cliaddrlen = sizeof(cliaddr);
 
     char buffer[MAX_BUFFER_SIZE];
-    fd_set set;
-    FD_ZERO(&set);
+    // fd_set set;
+    // FD_ZERO(&set);
+    int count=0;
+    // while (1)
+    // {
+        // FD_SET(newsockfd, &set);
+        // FD_SET(sockfd, &set);
+        // int max_fd = newsockfd > sockfd ? newsockfd : sockfd;
+        // select(max_fd + 1, &set, NULL, NULL, NULL);
+        // if (FD_ISSET(sockfd, &set))
+        // {
+        struct timeval start;
+        gettimeofday(&start, 0);
+        
+        while (strstr(buffer, "x") == NULL && time_since(start)<3000) //TODO
+        { 
+            count++;
+            if(count==1) gettimeofday(&start, 0);
 
-    while (1)
-    {
-        FD_SET(newsockfd, &set);
-        FD_SET(sockfd, &set);
-        int max_fd = newsockfd > sockfd ? newsockfd : sockfd;
-        select(max_fd + 1, &set, NULL, NULL, NULL);
-
-        if (FD_ISSET(sockfd, &set))
-        {
             int bytes_recv = recvfrom(sockfd, buffer, MAX_BUFFER_SIZE, 0,
                                       (struct sockaddr *)&cliaddr, &cliaddrlen);
             if (bytes_recv < 0)
@@ -105,10 +112,14 @@ void handle_server_ipv4_udp(int port)
                 perror("recv");
                 exit(EXIT_FAILURE);
             }
+           
         }
-        if (FD_ISSET(newsockfd, &set))
-        {
-            resvFun();         
-        }
-    }
+        // }
+    //     if (FD_ISSET(newsockfd, &set))
+    //     {
+    //         resvFun();         
+    //     }
+    // }
+    float total_time = time_since(start);
+    printf("Timer stopped. Remaining seconds: %f\n", total_time);
 }

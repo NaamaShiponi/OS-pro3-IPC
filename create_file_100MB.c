@@ -27,7 +27,7 @@ void create_file() {
     // for (i = 0; i < 10000L; i++) { 
     //     fputc('a', fp);
     // }
-
+    fputc('x', fp);
     fclose(fp);
     printf("File created successfully\n");
 }

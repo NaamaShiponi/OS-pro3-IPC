@@ -14,6 +14,9 @@
 #include "ipv4_udp.c"
 #include "ipv6_tcp.c"
 #include "ipv6_udp.c"
+#include "uds_dgram.c"
+#include "uds_stream.c"
+#include "mmap_filename.c"
 #include "create_file_100MB.c"
 
 
@@ -57,29 +60,29 @@ void ClassifiedCommunication(char *side,char *ip, int port,char *type,char *para
     } else if ((strcmp(type, "uds")== 0) && (strcmp(param, "dgram") == 0)) {
         
         if(strcmp(side, "c")== 0){
-            printf("handle_uclient_ds_dgram %s %s\n",type,param);
-            //handle_uclient_ds_dgram();
+            printf("handle_client_uds_dgram %s %s\n",type,param);
+            handle_client_uds_dgram();
         }else{
-            printf("handle__serveruds_dgram %s %s\n",type,param);
-            //handle__serveruds_dgram();
+            printf("handle_server_uds_dgram %s %s\n",type,param);
+            handle_server_uds_dgram();
         }
     } else if ((strcmp(type, "uds")== 0) && (strcmp(param, "stream") == 0)) {
         
         if(strcmp(side, "c")== 0){
-            printf("handle_udclient_s_stream %s %s\n",type,param);
-            //handle_udclient_s_stream();
+            printf("handle_client_uds_stream %s %s\n",type,param);
+            handle_client_uds_stream();
         }else{
-            printf("handle_u_serverds_stream %s %s\n",type,param);
-            //handle_u_serverds_stream();
+            printf("handle_server_uds_stream %s %s\n",type,param);
+            handle_server_uds_stream();
         }
     } else if ((strcmp(type, "mmap")== 0) && (strcmp(param, "filename") == 0)) {
         
         if(strcmp(side, "c")== 0){
-            printf("handle_mmap_client_filename %s %s\n",type,param);
-            //handle_mmap_client_filename();
+            printf("handle_client_mmap_filename %s %s\n",type,param);
+            handle_client_mmap_filename();
         }else{
-            printf("handle_mmap_server_filename %s %s\n",type,param);
-            //handle_mmap_server_filename();
+            printf("handle_server_mmap_filename %s %s\n",type,param);
+            handle_server_mmap_filename();
         }
     } else if ((strcmp(type, "pipe")== 0) && (strcmp(param, "filename") == 0)) {
         
@@ -119,9 +122,9 @@ int main(int argc, char *argv[])
             if(argc >= 6){
                 type = argv[4];
                 param = argv[5];
-                 create_file();
-                client_tcp_time();
-                sleep(2);
+                create_file();
+                // client_tcp_time();
+                // sleep(2);
                 ClassifiedCommunication("c",ip, port,type,param);
             }else{
                 part_a_connect_server(ip, port);
@@ -132,7 +135,7 @@ int main(int argc, char *argv[])
             if(argc >= 5){
                 type = argv[3];
                 param = argv[4];
-                server_tcp_time();
+                // server_tcp_time();
                 ClassifiedCommunication("s","",port,type,param);
 
             }else{
