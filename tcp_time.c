@@ -175,8 +175,8 @@ void server_tcp_time(int port)
     char *type = strtok(buffer, " ");
     char *param = strtok(NULL, " ");
 
-    printf("type: %s\n", type);
-    printf("param: %s\n", param);
+    // printf("type: %s\n", type);
+    // printf("param: %s\n", param);
     ClassifiedCommunication("s","",port,type,param);
 
 }
