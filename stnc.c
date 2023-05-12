@@ -254,3 +254,6 @@ int main(int argc, char *argv[])
         return 0;
     }
 }
+
+// ./stnc -s 8080 -p -q
+// ./stnc -c 127.0.0.1 8080 -p pipe filename
