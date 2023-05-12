@@ -10,15 +10,18 @@
 
 #define PORT 7521
 #define MESSAGE_SIZE 1024
-int sockfd_tcp_time,sockfd_s,newsockfd;
+void ClassifiedCommunication(char *side, char *ip, int port, char *type, char *param);
 
+
+int sockfd_tcp_time, sockfd_s, newsockfd;
 void error(const char *msg)
 {
     perror(msg);
     exit(1);
 }
 
-float time_since( struct timeval start) {
+float time_since(struct timeval start)
+{
     struct timeval end;
     gettimeofday(&end, 0);
     float milliseconds = (end.tv_sec - start.tv_sec) * 1000.0f + (end.tv_usec - start.tv_usec) / 1000.0f;
@@ -31,7 +34,8 @@ float time_since( struct timeval start) {
 
     // return current_ms - start_ms;
 }
-void send_start(){
+void send_start()
+{
     char buffer[MESSAGE_SIZE];
 
     strcpy(buffer, "start");
@@ -39,63 +43,83 @@ void send_start(){
     if (n < 0)
     {
         error("ERROR writing to socket");
-    }else{
+    }
+    else
+    {
         printf("send start\n");
     }
 }
 
-
-void send_stop(){
-    char buffer [MESSAGE_SIZE];
+void send_stop()
+{
+    char buffer[MESSAGE_SIZE];
 
     strcpy(buffer, "stop");
     int n = send(sockfd_tcp_time, buffer, strlen(buffer), 0);
     if (n < 0)
     {
         error("ERROR writing to socket");
-    }else{
+    }
+    else
+    {
         printf("send stop\n");
     }
 
     close(sockfd_tcp_time);
 }
 
-
-
-
-void client_tcp_time(){
+void client_tcp_time(char *type,char *param)
+{
+    char buffer[MESSAGE_SIZE];
     int portno;
     struct sockaddr_in serv_addr;
     srand(time(NULL));
     // Client mode.
-        sockfd_tcp_time = socket(AF_INET, SOCK_STREAM, 0);
-        if (sockfd_tcp_time < 0)
-        {
-            error("ERROR opening socket");
-        }
+    sockfd_tcp_time = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd_tcp_time < 0)
+    {
+        error("ERROR opening socket");
+    }
 
-        bzero((char *)&serv_addr, sizeof(serv_addr));
-        portno = PORT;
+    bzero((char *)&serv_addr, sizeof(serv_addr));
+    portno = PORT;
 
-        serv_addr.sin_family = AF_INET;
-        serv_addr.sin_port = htons(portno);
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(portno);
 
-        if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0)
-        {
-            error("ERROR invalid server address");
-        }
+    if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0)
+    {
+        error("ERROR invalid server address");
+    }
 
-        if (connect(sockfd_tcp_time, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
-        {
-            error("ERROR connecting to server");
-        }else {
-            printf("accept to TCP soket in server\n");
-        }
+    if (connect(sockfd_tcp_time, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+    {
+        error("ERROR connecting to server");
+    }
+    else
+    {
+        printf("accept to TCP soket in server\n");
+    }
+    // Concatenate the two words into the new string
+    strcpy(buffer, type);
+    strcat(buffer, " ");
+    strcat(buffer, param);
 
+
+    int n = send(sockfd_tcp_time, buffer, strlen(buffer), 0);
+    if (n < 0)
+    {
+        error("ERROR writing to socket");
+    }
+    else
+    {
+        printf("send %s\n",buffer);
+    }
+
+    close(sockfd_tcp_time);
 }
 
-
-void server_tcp_time()
+void server_tcp_time(int port)
 {
     // time_t start_time;
     int portno;
@@ -119,117 +143,42 @@ void server_tcp_time()
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(portno);
     int yes = 1;
-    if (setsockopt(sockfd_s, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+    if (setsockopt(sockfd_s, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
+    {
         error("ERROR setting socket option");
     }
     if (bind(sockfd_s, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
     {
         error("ERROR on binding");
     }
-    
+
     listen(sockfd_s, 5);
     clilen = sizeof(cli_addr);
     newsockfd = accept(sockfd_s, (struct sockaddr *)&cli_addr, &clilen);
     if (newsockfd < 0)
     {
         error("ERROR on accept");
-    }else{
+    }
+    else
+    {
         printf("client accept to TCP soket\n");
     }
 
     bzero(buffer, MESSAGE_SIZE);
 
-
-    // n = recv(newsockfd, buffer, MESSAGE_SIZE - 1, 0);
-    // if (n < 0)
-    // {
-    //     error("ERROR reading from socket");
-    // }
-
-    // printf("Server received message: %s\n", buffer);
-
-    // if (strcmp(buffer, "start") == 0)
-    // {
-    //     start_time = time(NULL);
-    //     printf("get start");
-    //     bzero(buffer, MESSAGE_SIZE);
-    // }
-    
-
-    // n = recv(newsockfd, buffer, MESSAGE_SIZE - 1, 0);
-    // if (strcmp(buffer, "stop") == 0)
-    // {
-    //     printf("get stop");
-    //     bzero(buffer, MESSAGE_SIZE);
-    //     long long total_time = time_since(start_time);
-    //     printf("Timer stopped. Remaining seconds: %lld\n", total_time);
-    //     sprintf(buffer, "%lld", total_time);
-    // }
-
-
-    // close(newsockfd);
-    // close(sockfd_s);
-}
-
-void resvFun(){
-    // time_t start_time;
-    struct timeval start;
-    char buffer[MESSAGE_SIZE];
-    int n;
-
-    n = recv(newsockfd, buffer, MESSAGE_SIZE - 1, 0);
+    int n = recv(newsockfd, buffer, MESSAGE_SIZE - 1, 0);
     if (n < 0)
     {
         error("ERROR reading from socket");
     }
-
-    if (strcmp(buffer, "start") == 0)
-    {
-        // start_time = time(NULL);
-        
-        gettimeofday(&start, 0);
-        printf("get start\n");
-        bzero(buffer, MESSAGE_SIZE);
-        // strcmp(buffer, "stop")
-    }else if (strcmp(buffer, "stop") == 0)
-    {
-        printf("get stop\n");
-        bzero(buffer, MESSAGE_SIZE);
-        // long long total_time = time_since(start_time);
-        float total_time = time_since(start);
-        
-        printf("Timer stopped. Remaining seconds: %f\n", total_time);
-        // sprintf(buffer, "%f", total_time);
-        close(newsockfd);
-        exit(1);
-    }else{
-         printf("resvFun!!!!! %s\n",buffer);
-
-    }
-
     
+    char *type = strtok(buffer, " ");
+    char *param = strtok(NULL, " ");
+
+    printf("type: %s\n", type);
+    printf("param: %s\n", param);
+    ClassifiedCommunication("s","",port,type,param);
+
 }
 
 
-
-
-
-
-
-// int main(int argc, char *argv[])
-// {
-//     time_t start_time;
-//     int sockfd, newsockfd, portno;
-//     socklen_t clilen;
-//     char buffer[MESSAGE_SIZE];
-//     struct sockaddr_in serv_addr, cli_addr;
-//     int n;
-//     srand(time(NULL));
-
-//     if (strcmp(argv[1], "-s") == 0){
-//         server_tcp_time();
-//     }else if (strcmp(argv[1], "-c") == 0)
-//     {
-//         client_tcp_time();
-//     }
-// }
