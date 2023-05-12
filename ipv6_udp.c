@@ -13,6 +13,8 @@
 
 #define MAX_BUFFER_SIZE 1024
 
+extern int p_flag;
+
 int create_socket_ipv6_udp() {
     int sockfd = socket(AF_INET6, SOCK_DGRAM, 0);
     if (sockfd < 0) {
@@ -33,7 +35,10 @@ void handle_client_ipv6_udp(char *ip, int port) {
         perror("connect");
         exit(EXIT_FAILURE);
     }
-    printf("Connected to server at %s IPv6 on port %d using UDP\n", ip, port);
+    
+    if (p_flag) {
+        printf("Connected to server (%s : %d) with IPv4 UDP\n", ip, port);
+    }
 
     FILE *file = fopen("100MB-File.txt", "rb");
     if (file == NULL) {
@@ -45,7 +50,9 @@ void handle_client_ipv6_udp(char *ip, int port) {
     int bytes_sent = 0;
     // int total_bytes_sent = 0;
 
-    printf("Starting to send the file\n");
+    if (p_flag) {
+        printf("Starting to send the file\n");
+    }
     while (1) {
         int bytes_read = fread(buffer, 1, MAX_BUFFER_SIZE, file);
         if (bytes_read == 0) {
@@ -57,8 +64,10 @@ void handle_client_ipv6_udp(char *ip, int port) {
             exit(EXIT_FAILURE);
         }
     }
-    printf("The entire file has been sent\n");
-    printf("Closes the connection with the server at %s on port %d using UDP\n", ip, port);
+    if (p_flag) {
+        printf("The entire file has been sent\n");
+        printf("Closes the connection with (%s : %d)\n", ip, port);
+    }
 
     fclose(file);
     close(sockfd);
@@ -78,55 +87,38 @@ void handle_server_ipv6_udp(int port)
         perror("bind");
         exit(EXIT_FAILURE);
     }
-    printf("Listening on port %d (IPv6, UDP)\n", port);
+
+    if (p_flag) {
+        printf("Listening on port %d (IPv4, UDP)\n", port);
+    }
 
     socklen_t cliaddrlen = sizeof(cliaddr);
 
     char buffer[MAX_BUFFER_SIZE];
-    // fd_set set;
-    // FD_ZERO(&set);
 
-    // while (1)
-    // {
-    //     FD_SET(STDIN_FILENO, &set);
-    //     FD_SET(sockfd, &set);
-    //     int max_fd = sockfd > STDIN_FILENO ? sockfd : STDIN_FILENO;
-    //     select(max_fd + 1, &set, NULL, NULL, NULL);
-    //     if (FD_ISSET(sockfd, &set))
-        // {
-        int count = 0;
-        struct timeval start;
-        gettimeofday(&start, 0);
-        
-        while (strstr(buffer, "x") == NULL && time_since(start)<3000) //TODO  
-        { 
-            count++;
-            if(count==1) gettimeofday(&start, 0);
-            int bytes_recv = recvfrom(sockfd, buffer, MAX_BUFFER_SIZE, 0,
-                                      (struct sockaddr *)&cliaddr, &cliaddrlen);
-            if (bytes_recv < 0)
-            {
-                perror("recvfrom");
-                exit(EXIT_FAILURE);
-            }
-            printf("bytes_recv = %d\n", bytes_recv);
+    int count = 0;
+    struct timeval start;
+    gettimeofday(&start, 0);
+    
+    while (strstr(buffer, "x") == NULL && time_since(start)<3000) //TODO  
+    { 
+        count++;
+        if(count==1) gettimeofday(&start, 0);
+        int bytes_recv = recvfrom(sockfd, buffer, MAX_BUFFER_SIZE, 0,
+                                    (struct sockaddr *)&cliaddr, &cliaddrlen);
+        if (bytes_recv < 0)
+        {
+            perror("recvfrom");
+            exit(EXIT_FAILURE);
         }
-        float total_time = time_since(start);
-        printf("ipv6_udp,%f\n", total_time);
-        // if (FD_ISSET(STDIN_FILENO, &set))
-        // {
-            // if (fgets(buffer, MAX_BUFFER_SIZE, stdin) != NULL)
-            // {
-            //     int bytes_sent = sendto(sockfd, buffer, strlen(buffer), 0,
-            //                             (struct sockaddr *)&cliaddr, sizeof(cliaddr));
-            //     if (bytes_sent < 0)
-            //     {
-            //         perror("sendto");
-            //         exit(EXIT_FAILURE);
-            //     }
-            // }
-        // }
-//     }
+    }
+
+    if (p_flag) {   
+        printf("The file has been received\n");
+    }
+
+    float total_time = time_since(start);
+    printf("ipv6_udp,%f\n", total_time);
 }
 
 // int main(int argc, char *argv[])

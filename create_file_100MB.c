@@ -7,7 +7,9 @@ void create_file() {
     long int i;    // Check if file already exists
     
     if (fopen(filename, "r") != NULL) {
-        printf("File already exists\n");
+        if (p_flag) {
+            printf("File already exists\n");
+        }
         return;
     }
 
@@ -23,13 +25,13 @@ void create_file() {
         fputc('a', fp);
     }
 
-    //100kB
-    // for (i = 0; i < 10000L; i++) { 
-    //     fputc('a', fp);
-    // }
     fputc('x', fp);
     fclose(fp);
-    printf("File created successfully\n");
+
+    if (p_flag)
+    {
+        printf("File created successfully\n");
+    }
 }
 
 

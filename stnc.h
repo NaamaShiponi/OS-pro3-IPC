@@ -2,7 +2,8 @@
 #define STNC_H
 #include "tcp_time.c"
 
-
+// Global variable
+extern int p_flag;
 
 //PART A FUNCTIONS
 void part_a_start_server(int port);

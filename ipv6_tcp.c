@@ -13,6 +13,8 @@
 
 #define MAX_BUFFER_SIZE 1024
 
+extern int p_flag;
+
 int create_socket_ipv6_tcp()
 {
     int sockfd = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
@@ -37,7 +39,10 @@ void handle_client_ipv6_tcp(char *ip, int port)
         perror("connect");
         exit(EXIT_FAILURE);
     }
-    printf("Connected to server at %s IPv6 on port %d using TCP\n", ip, port);
+    
+    if (p_flag) {
+        printf("Connected to server (%s : %d) with IPv6 TCP\n", ip, port);
+    }
 
     // Open the file for reading
     FILE *fp;
@@ -51,7 +56,11 @@ void handle_client_ipv6_tcp(char *ip, int port)
     // Send the contents of the file to the server
     char buffer[MAX_BUFFER_SIZE];
     size_t bytes_read;
-    printf("Starting to send the file\n");
+
+    if (p_flag) {
+        printf("Starting to send the file\n");
+    }
+
     while ((bytes_read = fread(buffer, sizeof(char), MAX_BUFFER_SIZE, fp)) > 0)
     {
         int bytes_sent = send(sockfd, buffer, bytes_read, 0);
@@ -62,8 +71,10 @@ void handle_client_ipv6_tcp(char *ip, int port)
         }
     }
 
-    printf("The entire file has been sent\n");
-    printf("Closes the connection with the server at %s on port %d using TCP\n", ip, port);
+    if (p_flag) {
+        printf("The entire file has been sent\n");
+        printf("Closes the connection with (%s : %d)\n", ip, port);
+    }
 
     // Close the file and the socket
     fclose(fp);
@@ -88,7 +99,11 @@ void handle_server_ipv6_tcp(int port)
         perror("listen");
         exit(EXIT_FAILURE);
     }
-    printf("Listening on port %d (IPv6, TCP)\n", port);
+
+    if (p_flag) {
+        printf("Listening on port %d (IPv6, TCP)\n", port);
+    }
+
     socklen_t cliaddrlen = sizeof(cliaddr);
     int connfd = accept(sockfd, (struct sockaddr *)&cliaddr, &cliaddrlen);
     if (connfd < 0)
@@ -96,56 +111,34 @@ void handle_server_ipv6_tcp(int port)
         perror("accept");
         exit(EXIT_FAILURE);
     }
+
     char buffer[MAX_BUFFER_SIZE];
-
-    // fd_set set;
-    // FD_ZERO(&set);
-
-    // while (1)
-    // {
-    //     FD_SET(STDIN_FILENO, &set);
-    //     FD_SET(connfd, &set);
-    //     int max_fd = connfd > STDIN_FILENO ? connfd : STDIN_FILENO;
-    //     select(max_fd + 1, &set, NULL, NULL, NULL);
-    //     if (FD_ISSET(connfd, &set))
-    //     {
     int count = 0;
     struct timeval start;
     gettimeofday(&start, 0);
     
     while (strstr(buffer, "x") == NULL)
     { 
-            count++;
-            if(count==1) gettimeofday(&start, 0);
-            int bytes_recv = recv(connfd, buffer, MAX_BUFFER_SIZE, 0);
-            if (bytes_recv < 0)
-            {
-                perror("recv");
-                exit(EXIT_FAILURE);
-            }
-            else if (bytes_recv == 0)
-            {
-                printf("Client disconnected\n");
-                exit(EXIT_SUCCESS);
-            }
+        count++;
+        if(count==1) gettimeofday(&start, 0);
+        int bytes_recv = recv(connfd, buffer, MAX_BUFFER_SIZE, 0);
+        if (bytes_recv < 0)
+        {
+            perror("recv");
+            exit(EXIT_FAILURE);
         }
+    }
+
     float total_time = time_since(start);
+
+    if (p_flag) {
+        printf("The file has been received\n");
+    }
+
     printf("ipv6_tcp,%f\n", total_time);
-    //     }
-    //     if (FD_ISSET(STDIN_FILENO, &set))
-    //     {
-    //         if (fgets(buffer, MAX_BUFFER_SIZE, stdin) != NULL)
-    //         {
-    //             int bytes_sent = send(connfd, buffer, strlen(buffer), 0);
-    //             if (bytes_sent < 0)
-    //             {
-    //                 perror("send");
-    //                 exit(EXIT_FAILURE);
-    //             }
-    //         }
-    //     }
-    // }
+
 }
+
 
 // int main(int argc, char *argv[])
 // {

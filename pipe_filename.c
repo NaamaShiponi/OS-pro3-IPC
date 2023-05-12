@@ -25,7 +25,10 @@ void handle_server_pipe_filename() {
     pfd.fd = fd;  // fd: The file descriptor to be monitored
     pfd.events = POLLIN;  // The events to monitor for, POLLIN for data to read
         
-    printf("Server open for received message\n");
+    if (p_flag) {
+        printf("Server open for received message with pipe filename\n");
+    }
+
     struct timeval start;
     gettimeofday(&start, 0);
     do {
@@ -36,8 +39,11 @@ void handle_server_pipe_filename() {
     } while (read(fd, buffer, sizeof(buffer)) > 0);
     
     float total_time = time_since(start);
+    
+    if (p_flag) {
+        printf("The file has been received\n");
+    }
     printf("pipe,%f\n", total_time); 
-    printf("Server received message\n");
     
     // close the pipe and remove the file
     close(fd);
@@ -56,12 +62,16 @@ void handle_client_pipe_filename() {
     FILE* fp = fopen("100MB-File.txt", "r");
 
     // read the contents of the file and write them to the pipe
-    printf("The client reads from the 100MB-File.txt file and write them to the pipe\n");
+    if(p_flag) {
+        printf("The client sends the file\n");
+    }
     while (fgets(buffer, sizeof(buffer), fp)) {
         write(fd, buffer, sizeof(buffer));
     }
-    printf("The client has finished sending the file through the pipe\n");
-
+    if (p_flag) {
+        printf("The client has finished sending the file\n");
+    }
+    
     // close the file and the pipe
     fclose(fp);
     close(fd);
