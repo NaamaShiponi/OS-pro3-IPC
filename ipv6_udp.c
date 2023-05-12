@@ -8,6 +8,8 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <errno.h>
+#include <sys/time.h>
+#include "stnc.h"
 
 #define MAX_BUFFER_SIZE 1024
 
@@ -41,6 +43,7 @@ void handle_client_ipv6_udp(char *ip, int port) {
 
     char buffer[MAX_BUFFER_SIZE];
     int bytes_sent = 0;
+    // int total_bytes_sent = 0;
 
     printf("Starting to send the file\n");
     while (1) {
@@ -80,17 +83,25 @@ void handle_server_ipv6_udp(int port)
     socklen_t cliaddrlen = sizeof(cliaddr);
 
     char buffer[MAX_BUFFER_SIZE];
-    fd_set set;
-    FD_ZERO(&set);
+    // fd_set set;
+    // FD_ZERO(&set);
 
-    while (1)
-    {
-        FD_SET(STDIN_FILENO, &set);
-        FD_SET(sockfd, &set);
-        int max_fd = sockfd > STDIN_FILENO ? sockfd : STDIN_FILENO;
-        select(max_fd + 1, &set, NULL, NULL, NULL);
-        if (FD_ISSET(sockfd, &set))
-        {
+    // while (1)
+    // {
+    //     FD_SET(STDIN_FILENO, &set);
+    //     FD_SET(sockfd, &set);
+    //     int max_fd = sockfd > STDIN_FILENO ? sockfd : STDIN_FILENO;
+    //     select(max_fd + 1, &set, NULL, NULL, NULL);
+    //     if (FD_ISSET(sockfd, &set))
+        // {
+        int count = 0;
+        struct timeval start;
+        gettimeofday(&start, 0);
+        
+        while (strstr(buffer, "x") == NULL && time_since(start)<3000) //TODO  
+        { 
+            count++;
+            if(count==1) gettimeofday(&start, 0);
             int bytes_recv = recvfrom(sockfd, buffer, MAX_BUFFER_SIZE, 0,
                                       (struct sockaddr *)&cliaddr, &cliaddrlen);
             if (bytes_recv < 0)
@@ -98,21 +109,24 @@ void handle_server_ipv6_udp(int port)
                 perror("recvfrom");
                 exit(EXIT_FAILURE);
             }
+            printf("bytes_recv = %d\n", bytes_recv);
         }
-        if (FD_ISSET(STDIN_FILENO, &set))
-        {
-            if (fgets(buffer, MAX_BUFFER_SIZE, stdin) != NULL)
-            {
-                int bytes_sent = sendto(sockfd, buffer, strlen(buffer), 0,
-                                        (struct sockaddr *)&cliaddr, sizeof(cliaddr));
-                if (bytes_sent < 0)
-                {
-                    perror("sendto");
-                    exit(EXIT_FAILURE);
-                }
-            }
-        }
-    }
+        float total_time = time_since(start);
+        printf("ipv6_udp,%f\n", total_time);
+        // if (FD_ISSET(STDIN_FILENO, &set))
+        // {
+            // if (fgets(buffer, MAX_BUFFER_SIZE, stdin) != NULL)
+            // {
+            //     int bytes_sent = sendto(sockfd, buffer, strlen(buffer), 0,
+            //                             (struct sockaddr *)&cliaddr, sizeof(cliaddr));
+            //     if (bytes_sent < 0)
+            //     {
+            //         perror("sendto");
+            //         exit(EXIT_FAILURE);
+            //     }
+            // }
+        // }
+//     }
 }
 
 // int main(int argc, char *argv[])
@@ -132,11 +146,11 @@ void handle_server_ipv6_udp(int port)
 //         case 'c':
 //             ip = argv[2];
 //             port = atoi(argv[3]);
-//             handle_client_ipv6_udp(ip, port);
+//             connect_server(ip, port);
 //             break;
 //         case 's':
 //             port = atoi(argv[2]);
-//             handle_server_ipv6_udp(port);
+//             start_server(port);
 //             break;
 //         default:
 //             printf("Usage: %s [-c IP PORT] | [-s PORT]\n", argv[0]);

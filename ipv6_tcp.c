@@ -8,6 +8,8 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <errno.h>
+#include <sys/time.h>
+#include "stnc.h"
 
 #define MAX_BUFFER_SIZE 1024
 
@@ -96,17 +98,25 @@ void handle_server_ipv6_tcp(int port)
     }
     char buffer[MAX_BUFFER_SIZE];
 
-    fd_set set;
-    FD_ZERO(&set);
+    // fd_set set;
+    // FD_ZERO(&set);
 
-    while (1)
-    {
-        FD_SET(STDIN_FILENO, &set);
-        FD_SET(connfd, &set);
-        int max_fd = connfd > STDIN_FILENO ? connfd : STDIN_FILENO;
-        select(max_fd + 1, &set, NULL, NULL, NULL);
-        if (FD_ISSET(connfd, &set))
-        {
+    // while (1)
+    // {
+    //     FD_SET(STDIN_FILENO, &set);
+    //     FD_SET(connfd, &set);
+    //     int max_fd = connfd > STDIN_FILENO ? connfd : STDIN_FILENO;
+    //     select(max_fd + 1, &set, NULL, NULL, NULL);
+    //     if (FD_ISSET(connfd, &set))
+    //     {
+    int count = 0;
+    struct timeval start;
+    gettimeofday(&start, 0);
+    
+    while (strstr(buffer, "x") == NULL)
+    { 
+            count++;
+            if(count==1) gettimeofday(&start, 0);
             int bytes_recv = recv(connfd, buffer, MAX_BUFFER_SIZE, 0);
             if (bytes_recv < 0)
             {
@@ -119,19 +129,22 @@ void handle_server_ipv6_tcp(int port)
                 exit(EXIT_SUCCESS);
             }
         }
-        if (FD_ISSET(STDIN_FILENO, &set))
-        {
-            if (fgets(buffer, MAX_BUFFER_SIZE, stdin) != NULL)
-            {
-                int bytes_sent = send(connfd, buffer, strlen(buffer), 0);
-                if (bytes_sent < 0)
-                {
-                    perror("send");
-                    exit(EXIT_FAILURE);
-                }
-            }
-        }
-    }
+    float total_time = time_since(start);
+    printf("ipv6_tcp,%f\n", total_time);
+    //     }
+    //     if (FD_ISSET(STDIN_FILENO, &set))
+    //     {
+    //         if (fgets(buffer, MAX_BUFFER_SIZE, stdin) != NULL)
+    //         {
+    //             int bytes_sent = send(connfd, buffer, strlen(buffer), 0);
+    //             if (bytes_sent < 0)
+    //             {
+    //                 perror("send");
+    //                 exit(EXIT_FAILURE);
+    //             }
+    //         }
+    //     }
+    // }
 }
 
 // int main(int argc, char *argv[])
