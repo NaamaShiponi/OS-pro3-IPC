@@ -5,11 +5,13 @@
 #include <sys/types.h>
 #include <poll.h>
 #include <string.h>
+#include <sys/time.h>
+#include "stnc.h"
 
 #define FILE_PIPE "file_pipe"
 
 void handle_server_pipe_filename() {
-    int fd, bytes_read;
+    int fd;
     char buffer[1024];
     struct pollfd pfd;
 
@@ -24,14 +26,17 @@ void handle_server_pipe_filename() {
     pfd.events = POLLIN;  // The events to monitor for, POLLIN for data to read
         
     printf("Server open for received message\n");
-
+    struct timeval start;
+    gettimeofday(&start, 0);
     do {
         // wait for an event
         poll(&pfd, 1, -1);
 
     // read the data from the pipe
     } while (read(fd, buffer, sizeof(buffer)) > 0);
-
+    
+    float total_time = time_since(start);
+    printf("pipe,%f\n", total_time); 
     printf("Server received message\n");
     
     // close the pipe and remove the file
@@ -63,19 +68,19 @@ void handle_client_pipe_filename() {
 }
 
 
-int main(int argc, char *argv[]) {
-    if (argc < 2) {
-        printf("Usage: pipe_filename -c for client or -s for server\n");
-        return 0;
-    }
+// int main(int argc, char *argv[]) {
+//     if (argc < 2) {
+//         printf("Usage: pipe_filename -c for client or -s for server\n");
+//         return 0;
+//     }
 
-    if (strcmp(argv[1], "-c") == 0) {
-        handle_client_pipe_filename();
-    } else if (strcmp(argv[1], "-s") == 0) {
-        handle_server_pipe_filename();
-    } else {
-        printf("Usage: pipe_filename -c for client or -s for server\n");
-    }
+//     if (strcmp(argv[1], "-c") == 0) {
+//         handle_client_pipe_filename();
+//     } else if (strcmp(argv[1], "-s") == 0) {
+//         handle_server_pipe_filename();
+//     } else {
+//         printf("Usage: pipe_filename -c for client or -s for server\n");
+//     }
 
-    return 0;
-}
+//     return 0;
+// }

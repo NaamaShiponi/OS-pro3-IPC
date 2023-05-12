@@ -17,6 +17,7 @@
 #include "uds_dgram.c"
 #include "uds_stream.c"
 #include "mmap_filename.c"
+#include "pipe_filename.c"
 #include "create_file_100MB.c"
 
 
@@ -87,11 +88,11 @@ void ClassifiedCommunication(char *side,char *ip, int port,char *type,char *para
     } else if ((strcmp(type, "pipe")== 0) && (strcmp(param, "filename") == 0)) {
         
         if(strcmp(side, "c")== 0){
-            printf("handle_pipe_client_filename %s %s\n",type,param);
-            //handle_pipe_client_filename();
+            printf("handle_client_pipe_filename %s %s\n",type,param);
+            handle_client_pipe_filename();
         }else{
-            printf("handle_pipe_server_filename %s %s\n",type,param);
-            //handle_pipe_server_filename();
+            printf("handle_server_pipe_filename %s %s\n",type,param);
+            handle_server_pipe_filename();
         }
     } else {
         printf("Unknown option: %s %s\n", type, param);
