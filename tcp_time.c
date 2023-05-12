@@ -159,10 +159,6 @@ void server_tcp_time(int port)
     {
         error("ERROR on accept");
     }
-    else
-    {
-        printf("client accept to TCP soket\n");
-    }
 
     bzero(buffer, MESSAGE_SIZE);
 
@@ -174,9 +170,6 @@ void server_tcp_time(int port)
     
     char *type = strtok(buffer, " ");
     char *param = strtok(NULL, " ");
-
-    // printf("type: %s\n", type);
-    // printf("param: %s\n", param);
     ClassifiedCommunication("s","",port,type,param);
 
 }
