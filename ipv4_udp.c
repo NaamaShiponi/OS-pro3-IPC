@@ -39,7 +39,6 @@ void handle_client_ipv4_udp(char *ip, int port)
     if (p_flag) {
         printf("Connected to server (%s : %d) with IPv4 UDP\n", ip, port);
     }
-    // Open file
     FILE *fp = fopen("100MB-File.txt", "r");
     if (!fp)
     {
@@ -51,7 +50,6 @@ void handle_client_ipv4_udp(char *ip, int port)
     char buffer[MAX_BUFFER_SIZE];
     size_t bytes_read = 0;
 
-    // send_start();
     if (p_flag) {
         printf("Starting to send the file\n");
     }

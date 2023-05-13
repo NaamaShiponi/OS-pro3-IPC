@@ -14,8 +14,6 @@ void part_a_connect_server(char *ip, int port);
 //tcp_time
 void server_tcp_time();
 void client_tcp_time();
-void send_start();
-void send_stop();
 void resvFun();
 
 //100MB file

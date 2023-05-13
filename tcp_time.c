@@ -26,46 +26,7 @@ float time_since(struct timeval start)
     gettimeofday(&end, 0);
     float milliseconds = (end.tv_sec - start.tv_sec) * 1000.0f + (end.tv_usec - start.tv_usec) / 1000.0f;
     return milliseconds;
-    // struct timespec current_time;
-    // clock_gettime(CLOCK_REALTIME, &current_time);
-
-    // long long start_ms = ((long long)start_time * 1000LL);
-    // long long current_ms = ((long long)current_time.tv_sec * 1000LL) + (current_time.tv_nsec / 1000000LL);
-
-    // return current_ms - start_ms;
-}
-void send_start()
-{
-    char buffer[MESSAGE_SIZE];
-
-    strcpy(buffer, "start");
-    int n = send(sockfd_tcp_time, buffer, strlen(buffer), 0);
-    if (n < 0)
-    {
-        error("ERROR writing to socket");
-    }
-    else
-    {
-        printf("send start\n");
-    }
-}
-
-void send_stop()
-{
-    char buffer[MESSAGE_SIZE];
-
-    strcpy(buffer, "stop");
-    int n = send(sockfd_tcp_time, buffer, strlen(buffer), 0);
-    if (n < 0)
-    {
-        error("ERROR writing to socket");
-    }
-    else
-    {
-        printf("send stop\n");
-    }
-
-    close(sockfd_tcp_time);
+    
 }
 
 void client_tcp_time(char *type,char *param)

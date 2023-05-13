@@ -57,7 +57,7 @@ void handle_client_ipv4_tcp(char *ip, int port)
         printf("Starting to send the file\n");
     }
     
-    // send_start();
+
     while (bytes_read > 0) {
         int bytes_sent = send(sockfd, buffer, bytes_read, 0);
         if (bytes_sent < 0)
@@ -67,7 +67,7 @@ void handle_client_ipv4_tcp(char *ip, int port)
         }
         bytes_read = fread(buffer, sizeof(char), MAX_BUFFER_SIZE, file);
     }
-    // send_stop();
+
     if (p_flag) {
         printf("The entire file has been sent\n");
         printf("Closes the connection with (%s : %d)\n", ip, port);
