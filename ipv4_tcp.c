@@ -8,7 +8,6 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <errno.h>
-// #include "tcp_time.c"
 #include "stnc.h"
 
 #define MAX_BUFFER_SIZE 1024

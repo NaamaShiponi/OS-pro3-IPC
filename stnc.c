@@ -240,7 +240,6 @@ int main(int argc, char *argv[])
                 }
 
                 server_tcp_time(port);
-                // ClassifiedCommunication("s","",port,type,param);
             }
         }
         else if (argc == 3)
