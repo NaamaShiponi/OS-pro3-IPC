@@ -37,7 +37,7 @@ void handle_client_ipv6_udp(char *ip, int port) {
     }
     
     if (p_flag) {
-        printf("Connected to server (%s : %d) with IPv4 UDP\n", ip, port);
+        printf("Connected to server (%s : %d) with IPv6 UDP\n", ip, port);
     }
 
     FILE *file = fopen("100MB-File.txt", "rb");
@@ -89,7 +89,7 @@ void handle_server_ipv6_udp(int port)
     }
 
     if (p_flag) {
-        printf("Listening on port %d (IPv4, UDP)\n", port);
+        printf("Listening on port %d (IPv6, UDP)\n", port);
     }
 
     socklen_t cliaddrlen = sizeof(cliaddr);
@@ -114,11 +114,13 @@ void handle_server_ipv6_udp(int port)
     }
 
     float total_time = time_since(start);
-    
+
     if (p_flag) {   
         printf("The file has been received\n");
         printf("checksum OK\n");
     }
+
+    total_time/=50;
 
     printf("ipv6_udp,%f\n", total_time);
 }

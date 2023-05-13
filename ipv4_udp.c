@@ -120,6 +120,8 @@ void handle_server_ipv4_udp(int port)
         printf("The file has been received\n");
         printf("checksum OK\n");
     }
-    
+
+    total_time/=50;
+
     printf("ipv4_udp,%f\n", total_time);
 }

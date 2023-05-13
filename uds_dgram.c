@@ -58,6 +58,8 @@ void handle_server_uds_dgram() {
         printf("checksum OK\n");
     }
 
+    total_time/=50;
+
     printf("uds_dgram,%f\n", total_time);
 
     close(sockfd);
