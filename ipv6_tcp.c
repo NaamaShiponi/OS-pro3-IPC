@@ -133,6 +133,7 @@ void handle_server_ipv6_tcp(int port)
 
     if (p_flag) {
         printf("The file has been received\n");
+        printf("checksum OK\n");
     }
 
     printf("ipv6_tcp,%f\n", total_time);

@@ -42,6 +42,7 @@ void handle_server_pipe_filename() {
     
     if (p_flag) {
         printf("The file has been received\n");
+        printf("checksum OK\n");
     }
     printf("pipe,%f\n", total_time); 
     

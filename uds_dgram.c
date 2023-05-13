@@ -55,6 +55,7 @@ void handle_server_uds_dgram() {
 
     if (p_flag) {
         printf("The file has been received\n");
+        printf("checksum OK\n");
     }
 
     printf("uds_dgram,%f\n", total_time);

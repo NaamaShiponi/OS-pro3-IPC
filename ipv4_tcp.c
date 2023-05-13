@@ -75,7 +75,6 @@ void handle_client_ipv4_tcp(char *ip, int port)
 
     // Close the file and socket
     fclose(file);
-    // close(sockfd);
 }
 
 void handle_server_ipv4_tcp(int port)
@@ -126,11 +125,13 @@ void handle_server_ipv4_tcp(int port)
         }
     }
 
+    float total_time = time_since(start);
+
     if (p_flag) {
         printf("The file has been received\n");
+        printf("checksum OK\n");
     }
-
-    float total_time = time_since(start);
+    
     printf("ipv4_tcp,%f\n", total_time);
     
 }

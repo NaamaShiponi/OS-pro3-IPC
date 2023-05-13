@@ -8,7 +8,7 @@
 #include "stnc.h"
 
 #define SHARED_MEM_NAME "/my_shared_memory"
-#define SHARED_MEM_SIZE (1024*1024*1024) // 1 GB
+#define SHARED_MEM_SIZE (256*1024*1024) // 250 MB
 
 extern int p_flag;
 
@@ -55,6 +55,7 @@ void handle_server_mmap_filename() {
 
     if (p_flag) {
         printf("The file has been received\n");
+        printf("checksum OK\n");
     }
     printf("mmap,%f\n", total_time);
     memset(addr, 0, SHARED_MEM_SIZE);

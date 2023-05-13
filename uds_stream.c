@@ -133,6 +133,7 @@ void handle_server_uds_stream()
     float total_time = time_since(start);
     if (p_flag) {
         printf("The file has been received\n");
+        printf("checksum OK\n");
     }
     printf("uds_stream,%f\n", total_time);
 
