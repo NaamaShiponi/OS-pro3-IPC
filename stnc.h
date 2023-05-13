@@ -1,6 +1,6 @@
 #ifndef STNC_H
 #define STNC_H
-#include "tcp_time.c"
+#include "tcp_sock.c"
 
 // Global variable
 extern int p_flag;
@@ -11,10 +11,9 @@ void part_a_connect_server(char *ip, int port);
 
 
 //PART B FUNCTIONS
-//tcp_time
-void server_tcp_time();
-void client_tcp_time();
-void resvFun();
+//tcp_sock
+void server_tcp();
+void client_tcp();
 
 //100MB file
 void create_file();

@@ -13,8 +13,8 @@ PART_A_O= $(PART_A_C:.c=.o)
 
 # PART B
 #-tcp time
-TCP_TIME_C= tcp_time.c
-TCP_TIME_O= $(TCP_TIME_C:.c=.o) 
+TCP_SOCK_C= tcp_sock.c
+TCP_SOCK_O= $(TCP_SOCK_C:.c=.o) 
 
 #-ipv6 tcp
 IPV6_TCP_C= ipv6_tcp.c
@@ -49,7 +49,7 @@ PIPE_FILENAME_C=pipe_filename.c
 PIPE_FILENAME_O= $(PIPE_FILENAME_C:.c=.o)
 
 #ALL FILE
-OBJS = $(STNC_O) $(TCP_TIME_O) $(IPV6_TCP_O) $(PART_A_O) $(IPV4_UDP_O) $(IPV6_UDP_O) $(IPV4_TCP_O) $(UDS_DGRAM_O) $(UDS_STREAM_O) $(MMAP_FILENAME_O) $(PIPE_FILENAME_O)
+OBJS = $(STNC_O) $(TCP_SOCK_O) $(IPV6_TCP_O) $(PART_A_O) $(IPV4_UDP_O) $(IPV6_UDP_O) $(IPV4_TCP_O) $(UDS_DGRAM_O) $(UDS_STREAM_O) $(MMAP_FILENAME_O) $(PIPE_FILENAME_O)
 ALLFILES = $(OBJS) $(STNC_C:.c=) 
 
 all: stnc
@@ -63,7 +63,7 @@ $(STNC_O): $(STNC_C) $(STNC_H)
 $(PART_A_O): $(PART_A_C) $(STNC_H)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(TCP_TIME_O): $(TCP_TIME_C) $(STNC_H)
+$(TCP_SOCK_O): $(TCP_SOCK_C) $(STNC_H)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(IPV6_TCP_O): $(IPV6_TCP_C) $(STNC_H)

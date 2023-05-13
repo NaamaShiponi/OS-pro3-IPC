@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
                     param = argv[6];
                     create_file();
                     sleep(2);
-                    client_tcp_time(type, param);
+                    client_tcp(type, param);
                     sleep(2);
                     ClassifiedCommunication("c", ip, port, type, param);
                 }
@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
                     p_flag = 0;
                 }
 
-                server_tcp_time(port);
+                server_tcp(port);
             }
         }
         else if (argc == 3)

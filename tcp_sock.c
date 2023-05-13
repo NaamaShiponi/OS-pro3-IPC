@@ -12,8 +12,8 @@
 #define MESSAGE_SIZE 1024
 void ClassifiedCommunication(char *side, char *ip, int port, char *type, char *param);
 
+int sockfd_tcp_sock, sockfd_s, newsockfd;
 
-int sockfd_tcp_time, sockfd_s, newsockfd;
 void error(const char *msg)
 {
     perror(msg);
@@ -29,15 +29,15 @@ float time_since(struct timeval start)
     
 }
 
-void client_tcp_time(char *type,char *param)
+void client_tcp(char *type,char *param)
 {
     char buffer[MESSAGE_SIZE];
     int portno;
     struct sockaddr_in serv_addr;
     srand(time(NULL));
     // Client mode.
-    sockfd_tcp_time = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd_tcp_time < 0)
+    sockfd_tcp_sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd_tcp_sock < 0)
     {
         error("ERROR opening socket");
     }
@@ -53,7 +53,7 @@ void client_tcp_time(char *type,char *param)
         error("ERROR invalid server address");
     }
 
-    if (connect(sockfd_tcp_time, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+    if (connect(sockfd_tcp_sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
     {
         error("ERROR connecting to server");
     }
@@ -67,7 +67,7 @@ void client_tcp_time(char *type,char *param)
     strcat(buffer, param);
 
 
-    int n = send(sockfd_tcp_time, buffer, strlen(buffer), 0);
+    int n = send(sockfd_tcp_sock, buffer, strlen(buffer), 0);
     if (n < 0)
     {
         error("ERROR writing to socket");
@@ -77,10 +77,10 @@ void client_tcp_time(char *type,char *param)
         printf("send %s\n",buffer);
     }
 
-    close(sockfd_tcp_time);
+    close(sockfd_tcp_sock);
 }
 
-void server_tcp_time(int port)
+void server_tcp(int port)
 {
     // time_t start_time;
     int portno;
