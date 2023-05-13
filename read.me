@@ -1,0 +1,84 @@
+IPC
+
+submit the assignment - Naama Shiponi 318607314
+                        Ben Dabush 316014760
+
+
+# Chat Tool with Performance Testing
+    This project is a simple chat tool with performance testing capabilities. 
+    The chat tool is designed to send messages over a network using the IPv4 TCP protocol, 
+    allowing for two-way communication between a client and a server. 
+    The performance testing capabilities allow the user to generate a chunk of data with a 100MB size, 
+    generate a checksum for the data, and transmit the data using different communication styles while 
+    measuring the time it takes.
+
+
+# The files of the assignment
+    stnc.c 
+    stnc.h
+    tcp_sock.c
+    ipv4_tcp.c
+    ipv4_udp.c
+    ipv6_tcp.c
+    ipv6_udp.c
+    uds_dgram.c
+    uds_stream.c
+    mmap_filename.c
+    pipe_filename.c
+    Makefile
+
+
+# Run the task
+    $ make
+
+
+# Usage
+    To use the chat tool, run the following commands:
+
+
+# Server Side:
+
+    $ ./stnc -s PORT
+
+# Client Side:
+
+    $ ./stnc -c IP PORT
+
+    (The IP argument is the IP address of the server, and the PORT argument is the port number the server is listening on. The stnc tool can read input from the keyboard and listen to the socket of the other side.)
+
+
+# On the server side, run the following command:
+
+    $ stnc -s PORT -p -q
+
+    (The -p flag indicates that the performance test will be performed. The -q flag enables quiet mode, in which only the testing results will be printed.)
+
+
+# To use the performance testing capabilities, run the following command on the client side:
+
+    $ stnc -c IP PORT -p <type> <param>
+
+    (The -p flag indicates that the performance test will be performed. The <type> argument specifies the communication type, which can be ipv4, ipv6, mmap, pipe, or uds. The <param> argument is a parameter for the type. It can be udp/tcp or dgram/stream or file name.)
+
+
+# Performance Testing Results
+    The performance test results will be in milliseconds (ms) and printed like this:
+
+    name_type,time
+
+    Here are some examples:
+
+        ipv4_tco,54554
+        ipv4_udp,112233
+        ipv6_tco,54554
+        ipv6_udp,112233
+        uds_stream,112233
+        uds_dgram,112233
+        mmap,223355
+        pipe,554411
+
+
+# Conclusion
+The chat tool with performance testing capabilities is a useful tool for testing network performance.
+It can be used to send messages over a network and test different communication styles, 
+making it a versatile tool for developers. 
